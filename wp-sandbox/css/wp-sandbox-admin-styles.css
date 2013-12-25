@@ -305,3 +305,10 @@ div.inner-right-subnet{
 #wps-subnets-table tr td{
 	text-align: center;
 }
+.wps-admin-menu-notification{
+	background-color: red !important;
+	color: white !important;
+}
+.wps-admin-menu-notification:hover{
+	background-color: red !important;
+}
