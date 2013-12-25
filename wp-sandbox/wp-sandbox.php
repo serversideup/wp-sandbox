@@ -1001,11 +1001,13 @@
 			$destroyWPSSettingsQuery = "DROP TABLE ".$wpdb->prefix."wps_coming_soon_settings";
 			$destroyWPSFacebookSubnetsQuery = "DROP TABLE ".$wpdb->prefix."wps_facebook_subnets";
 			$destroyWPSIPRangesQuery = "DROP TABLE ".$wpdb->prefix."wps_ip_ranges";
+			$destroyWPSSubnetsQuery = "DROP TABLE ".$wpdb->prefix."wps_subnets";
 
 			$wpdb->query($destroyWPSQuery);
 			$wpdb->query($destroyWPSSettingsQuery);
 			$wpdb->query($destroyWPSFacebookSubnetsQuery);
 			$wpdb->query($destroyWPSIPRangesQuery);
+			$wpdb->query($destroyWPSSubnetsQuery);
 		}
 
 		/*
