@@ -6,7 +6,108 @@
 		public function __destruct(){
 
 		}
-		public function wps_display_admin_screen(){
+		public function wps_display_network_admin_screen(){
+			global $wpdb;
+
+			$checkWPSEnabledQuery = "SELECT blog_id, setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled'";
+			$checkWPSEnabled = $wpdb->get_results($checkWPSEnabledQuery, ARRAY_A);
+
+			$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon";
+			$getIPRangesQuery = "SELECT * FROM ".$wpdb->prefix."wps_ip_ranges";
+			$getSubnetsQuery = "SELECT * FROM ".$wpdb->prefix."wps_subnets";
+
+			$allValidatedUsers = $wpdb->get_results($getAllValidatedUsersQuery, ARRAY_A);
+			$ipRanges = $wpdb->get_results($getIPRangesQuery, ARRAY_A);
+			$subnets = $wpdb->get_results($getSubnetsQuery, ARRAY_A);
+
+			echo '<h1>WP Sandbox Network Settings and Access</h1>';
+
+			echo '<div id="wps-network-admin-tab-container">';
+				echo '<div class="wps-network-admin-tab" id="wps-network-site-status-tab" onclick="wps_network_display_site_status_tab()">';
+					echo 'Site Status';
+				echo '</div>';
+				echo '<div class="wps-network-admin-tab wps-network-admin-tab-inactive" id="wps-network-network-access-tab" onclick="wps_network_display_network_access_tab()">';
+					echo 'Network Access';
+				echo '</div>';
+			echo '</div>';
+
+			echo '<div id="wps-network-site-status-tab-display">';
+				echo '<h2>Plugin Status (Network View)</h2>';
+				echo '<div id="wps-network-enable-alert" class="updated">';
+
+				echo '</div>';
+				echo '<table id="wps-plugin-status-network-table">';
+					echo '<thead>';
+						echo '<tr>';
+							echo '<th><input id="wps-network-enable-all-checkboxes" type="checkbox"/> Status</th>';
+							echo '<th>Site Name</th>';
+						echo '</tr>';
+					echo '</thead>';
+					echo '<tbody>';
+						foreach($checkWPSEnabled as $enabledStatus){
+							$blogInfo = get_blog_details($enabledStatus['blog_id']);
+							echo '<tr>';
+								if($enabledStatus['setting_value'] == 1){
+									echo '<td><input type="checkbox" class="wps-network-enable-checkbox" data-attr-blog-id="'.$enabledStatus['blog_id'].'" name="wps-network-enable-blog" id="wps-network-enable-blog" checked="checked"></td>';
+								}else{
+									echo '<td><input type="checkbox" class="wps-network-enable-checkbox" data-attr-blog-id="'.$enabledStatus['blog_id'].'" name="wps-network-enable-blog" id="wps-network-enable-blog"></td>';
+								}
+								echo '<td>http://'.$blogInfo->domain.'</td>';
+							echo '</tr>';
+						}
+					echo '</tbody>';
+				echo '</table>';
+				echo '<br>';
+				echo '<a class="button-primary" onclick="wps_network_enable()">Save Changes</a>';
+			echo '</div>';
+
+			echo '<div id="wps-network-access-tab-display">';
+				echo '<table id="wps-network-global-access-table">';
+					echo '<thead>';
+						echo '<tr>';
+							echo '<th>Site Name</th>';
+							echo '<th>Type</th>';
+							echo '<th>Network/IPs</th>';
+							echo '<th>Expires</th>';
+							echo '<th></th>';
+						echo '</tr>';
+					echo '</thead>';
+					echo '<tbody id="wps-network-global-access-table-body">';
+						foreach($allValidatedUsers as $validatedUser){
+							$blogInfo = get_blog_details($validatedUser['blog_id']);
+							echo '<tr>';
+								echo '<td>http://'.$blogInfo->domain.'</td>';
+								echo '<td>Single</td>';
+								echo '<td>'.$validatedUser['ip'].'</td>';
+								echo '<td>'.$validatedUser['expires'].'</td>';
+								echo '<td><div class="wps-remove" onclick="wps_network_remove_user(\''.$validatedUser['blog_id'].'\', \''.$validatedUser['user_id'].'\', \''.$validatedUser['ip'].'\')">&times;</div></td>';
+							echo '</tr>';
+						}
+						foreach($ipRanges as $ipRange){
+							$blogInfo = get_blog_details($ipRange['blog_id']);
+							echo '<tr>';
+								echo '<td>http://'.$blogInfo->domain.'</td>';
+								echo '<td>Range</td>';
+								echo '<td>'.$ipRange['start_ip'].' - '.$ipRange['end_ip'].'</td>';
+								echo '<td>'.$ipRange['expires'].'</td>';
+								echo '<td><div class="wps-remove" onclick="wps_network_remove_range(\''.$ipRange['blog_id'].'\', \''.$ipRange['start_ip'].'\', \''.$ipRange['end_ip'].'\')">&times;</div></td>';
+							echo '</tr>';
+						}
+						foreach($subnets as $subnet){
+							$blogInfo = get_blog_details($subnet['blog_id']);
+							echo '<tr>';
+								echo '<td>http://'.$blogInfo->domain.'</td>';
+								echo '<td>Network</td>';
+								echo '<td>'.$subnet['start_ip'].'/'.$subnet['subnet'].'</td>';
+								echo '<td>'.$subnet['expires'].'</td>';
+								echo '<td><div class="wps-remove" onclick="wps_network_remove_subnet(\''.$subnet['blog_id'].'\', \''.$subnet['start_ip'].'\', \''.$subnet['subnet'].'\')">&times;</div></td>';
+							echo '</tr>';
+						}
+					echo '</tbody>';
+				echo '</table>';
+			echo '</div>';
+		}
+		public function wps_display_single_site_settings_screen(){
 			global $wpdb;
 
 			if(is_multisite()){
@@ -15,40 +116,55 @@
 				switch_to_blog(1);
 
 				$checkDefaultWPSPageQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Page' AND blog_id = '".$currentBlogID."'";
-				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon WHERE blog_id = '".$currentBlogID."'";
-				$getPreviewHashQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Preview Hash' AND blog_id = '".$currentBlogID."'";
-				$getIPRangesQuery = "SELECT start_ip, end_ip FROM ".$wpdb->prefix."wps_ip_ranges WHERE blog_id = '".$currentBlogID."'";
-				$getSubnetsQuery = "SELECT start_ip, subnet FROM ".$wpdb->prefix."wps_subnets WHERE blog_id = '".$currentBlogID."'";
 				$checkDefaultWPSExpireQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Expiration Time' AND blog_id = '".$currentBlogID."'";
 				$checkDefaultEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled' AND blog_id = '".$currentBlogID."'";
 			}else{
 				$checkDefaultWPSPageQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Page'";
-				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon";
-				$getPreviewHashQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Preview Hash'";
-				$getIPRangesQuery = "SELECT start_ip, end_ip FROM ".$wpdb->prefix."wps_ip_ranges";
-				$getSubnetsQuery = "SELECT start_ip, subnet FROM ".$wpdb->prefix."wps_subnets";
 				$checkDefaultWPSExpireQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Expiration Time'";
 				$checkDefaultEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled'";
 			}
 
-			
-			$checkDefaultWPSPage = $wpdb->get_results($checkDefaultWPSPageQuery, ARRAY_A);
-			$allValidatedUsers = $wpdb->get_results($getAllValidatedUsersQuery, ARRAY_A);
-			$previewHash = $wpdb->get_results($getPreviewHashQuery, ARRAY_A);
-			$ipRanges = $wpdb->get_results($getIPRangesQuery, ARRAY_A);
-			$subnets = $wpdb->get_results($getSubnetsQuery, ARRAY_A);
 			$checkDefaultWPSExpire = $wpdb->get_results($checkDefaultWPSExpireQuery, ARRAY_A);
+			$checkDefaultWPSPage = $wpdb->get_results($checkDefaultWPSPageQuery, ARRAY_A);
 			$checkDefaultEnabled = $wpdb->get_results($checkDefaultEnabledQuery, ARRAY_A);
 
 			if(is_multisite()){
 				restore_current_blog();
 			}
+
+			if($checkDefaultEnabled[0]['setting_value'] == '0'){
+				echo '<div class="wps-disable-banner">';
+					echo 'WP Sandbox is currently <strong>DISABLED</strong>. Public users are able to access '.home_url('/');
+				echo '</div>';
+			}else{
+				echo '<div class="wps-disable-banner" style="display:none">';
+					echo 'WP Sandbox is currently <strong>DISABLED</strong>. Public users are able to access '.home_url('/');
+				echo '</div>';
+			}
+			echo '<div id="wps-settings-saved" class="updated">';
+				echo 'WP Sandbox settings saved';
+			echo '</div>';
 			echo '<h1>WP Sandbox Settings</h1>';
-			echo '<div id="wps-left">';
-				echo '<div id="wps-settings-saved">Settings Saved!</div>';
-				echo '<div class="wps-settings"><p>Please select a page to redirect users to who don\'t have permissions to view your site. If no page is selected, the default 404 page will show.</p>';
-				echo '<strong>Page for Unauthorized Users: </strong><br><select name="wps-default-page" id="wps-default-page"> 
-	 					<option value="">'.esc_attr( __( 'Select page' ) ).'</option>';
+
+			echo '<div class="wps-display-row">';
+				echo '<div class="wps-display-label">Limit public access to website: </div>';
+				echo '<ul class="wps-toggle">';
+					if($checkDefaultEnabled[0]['setting_value'] == '0'){
+						echo '<li class="on" data-setting="off"><a href="#">OFF</a></li>';
+    					echo '<li data-setting="on"><a href="#">ON</a></li>';
+					}else{
+						echo '<li data-setting="off"><a href="#">OFF</a></li>';
+    					echo '<li class="on" data-setting="on"><a href="#">ON</a></li>';
+					}
+				echo '</ul>';
+			echo '</div>';
+
+			echo '<div class="wps-display-row">';
+				echo '<div class="wps-display-label">Page for Unauthorized Users: </div>';
+				echo '<div class="wps-display-setting">';
+					echo '<select name="wps-default-page" id="wps-default-page">'; 
+		 				echo '<option value="">'.esc_attr( __( 'Select page' ) ).'</option>';
+		 					
 	 					if($checkDefaultWPSPage[0]['setting_value'] == 'blank'){
 							echo '<option value="blank" selected>Blank</option>';
 						}else{
@@ -58,20 +174,24 @@
 	  					$pages = get_pages(); 
 						foreach ( $pages as $page ) {
 							$link = get_page_link($page->ID);
+
 							if($link == $checkDefaultWPSPage[0]['setting_value']){
 								$option = '<option value="' . get_page_link( $page->ID ) . '" selected>';
 							}else{
 						  		$option = '<option value="' . get_page_link( $page->ID ) . '">';
 						  	}
+
 							$option .= $page->post_title;
 							$option .= '</option>';
 							echo $option;
 						 }
-				echo '</select><br>';
-				echo '<button id="wps-save-default-page-button" onclick="wps_save_default_page_setting()">Save Default Page</button></div>';
 
-				echo '<div class="wps-settings">';
-					echo '<strong>Set Default Expiration Time: </strong><br>';
+					echo '</select>';
+				echo '</div>';
+			echo '</div>';
+			echo '<div class="wps-display-row">';
+				echo '<div class="wps-display-label">Default access expiration time: </div>';
+				echo '<div class="wps-display-setting">';
 					echo '<select name="wps-default-expire-time" id="wps-default-expire-time">';
 						if($checkDefaultWPSExpire[0]['setting_value'] == 'day'){
 							echo '<option value="day" selected>Day</option>';
@@ -102,151 +222,146 @@
 						}else{
 							echo '<option value="never">Never Expire</option>';
 						}
-					echo '</select><br>';
-					echo '<button id="wps-save-default-expire-time-button" onclick="wps_save_default_expire_time()">Save Default Expiration Time</button>';
-				echo '</div>';
-				echo '<div class="wps-settings">';
-					echo '<div id="wps-allow-ip">';
-						echo '<strong>Allow this IP: </strong><br><input type="text" id="wps-allowed-ip" name="wps-allowed-ip"/><br>';
-						echo '<strong>For: </strong><select name="wps-ip-allowed-expire-time" id="wps-ip-allowed-expire-time">';
-							echo '<option value="day">One Day</option>';
-							echo '<option value="week">One Week</option>';
-							echo '<option value="twoweeks">Two Weeks</option>';
-							echo '<option value="month">One Month</option>';
-							echo '<option value="never">Never Expire</option>';
-						echo '</select>';
-						echo '<button onclick="wps_allow_ip()" id="wps-allow-ip-button">Allow Access</button>';
-					echo '</div>';
+					echo '</select>';
 				echo '</div>';
 			echo '</div>';
-
-			echo '<div id="wps-right">';
-                echo '<span class="switch-label"><strong>Enabled</strong></span>';
-                echo '<span class="switch-off">OFF</span>';
-                echo '<div class="onoffswitch">';
-                	if($checkDefaultEnabled[0]['setting_value'] == '1'){
-                		echo '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="sandbox-enabled" checked>';
-                	}else{
-                		echo '<input type="checkbox" name="onoffswitch" class="onoffswitch-checkbox" id="sandbox-enabled">';
-                	}
-	                echo '<label class="onoffswitch-label" for="sandbox-enabled">';
-	                    echo '<div class="onoffswitch-inner"></div>';
-	                    echo '<div class="onoffswitch-switch"></div>';
-	                echo '</label>';
-                echo '</div>';
-                echo '<span class="switch-on">ON</span><br>';
-
-                //IP Ranges
-				echo '<div id="wps-ip-range">';
-					echo '<h3>IP Ranges</h3>';
-					echo '<div class="ip-range-row">';
-						echo '<div class="inner-left-range">';
-							echo '<strong>Starting IP: </strong><br><input type="text" name="wps-starting-ip[]"/>';
-						echo '</div>';
-						echo '<div class="inner-middle-range">';
-							echo 'to';
-						echo '</div>';
-						echo '<div class="inner-right-range">';
-							echo '<strong>Ending IP: </strong><br><input type="text" name="wps-ending-ip[]"/>';
-						echo '</div>';
-					echo '</div>';
-				echo '</div>';
-				echo '<div id="wps-additional-ip-range">';
-
-				echo '</div>';
-				
-				echo '<button onclick="wps_add_ip_range()" id="wps-add-ip-button">Add IP Range</button>';
-				echo '<button onclick="wps_save_ip_ranges()" id="wps-save-ip-ranges-button">Save IP Ranges</button>';
-
-				//Subnets
-				echo '<div id="wps-subnets">';
-					echo '<h3>Subnets</h3>';
-					echo '<div class="wps-subnet-row">';
-						echo '<div class="inner-left-subnet">';
-							echo '<strong>IP: </strong><br><input type="text" name="wps-subnet-ip[]"/>';
-						echo '</div>';
-						echo '<div class="inner-middle-subnet">';
-							echo '/';
-						echo '</div>';
-						echo '<div class="inner-right-subnet">';
-							echo '<strong>Subnet</strong><br><input type="text" name="wps-subnet-subnet[]"/>';
-						echo '</div>';
-					echo '</div>';
-					echo '<div id="wps-additional-subnets">';
-
-					echo '</div>';
-
-					echo '<button onclick="wps_add_subnet()" id="wps-add-subnet-button">Add Subnet</button>';
-					echo '<button onclick="wps_save_subnets()" id="wps-save-subnets-button">Save Subnets</button>';
-				echo '</div>';
-				echo '<div id="wps-preview-hash-div">';
-					echo '<p><strong>Copy the URL below to share with users who need access without IP authentication. NOTE: Any user with this URL will be able to access the site unless the URL is regenerated.</strong></p><br>';
-					echo '<strong>Copy this URL</strong>: <input type="text" id="wps-preview-hash" name="wps-preview-hash" onClick="this.select()" value="'.home_url('/').'?wp-sandbox-preview='.$previewHash[0]['setting_value'].'">';
-					echo '<button onclick="wps_update_preview_hash()" id="wps-update-preview-hash-button">Update Preview Hash</button>';
-				echo '</div>';
-				echo '<div id="wps-user-removed">User Removed!</div>';
-				echo '<div id="wps-ip-added">IP Added</div>';
-				echo '<p>These IPs are auhtenticated to browse the entire site (that includes other machines on the same network)</p>';
-				echo '<table id="wps-validated-users">';
-					echo '<thead>';
-						echo '<tr>';
-							echo '<th>Added By</th><th>IP</th><th>Last Login</th><th>Expires</th><th>Remove User</th>';
-						echo '</tr>';
-					echo '</thead>';
-					echo '<tbody id="wps-users-body">';
-						foreach($allValidatedUsers as $user){
-							$userInfo = get_userdata($user['user_id']);
-							echo '<tr>';
-								echo '<td>'.$userInfo->user_login.'</td>';
-								echo '<td>'.$user['ip'].'</td>';
-								echo '<td>'.$user['last_login'].'</td>';
-								
-								if($user['expires'] == '0000-00-00 00:00:00'){
-									echo '<td>Never</td>';
-								}else{
-									echo '<td>'.$user['expires'].'</td>';
-								}
-
-								echo '<td><span class="wps-remove" onclick="wps_remove_user('.$user['user_id'].', \''.$user['ip'].'\')"></span></td>';
-							echo '</tr>';
-						}
-					echo '</tbody>';
-				echo '</table>';
-				echo '<table id="wps-ip-ranges">';
-					echo '<thead>';
-						echo '<tr>';
-							echo '<th>Start IP</th><th>End IP</th><th>Remove Range</th>';
-						echo '</tr>';
-					echo '</thead>';
-					echo '<tbody id="wps-ip-ranges-body">';
-						foreach($ipRanges as $ipRange){
-							echo '<tr>';
-								echo '<td>'.$ipRange['start_ip'].'</td>';
-								echo '<td>'.$ipRange['end_ip'].'</td>';
-								echo '<td><span class="wps-remove" onclick="wps_remove_range(\''.$ipRange['start_ip'].'\', \''.$ipRange['end_ip'].'\')"></span></td>';
-							echo '</tr>';
-						}
-					echo '</tbody>';
-				echo '</table>';
-				echo '<table id="wps-subnets-table">';
-					echo '<thead>';
-						echo '<tr>';
-							echo '<th>Subnet</th><th>Remove Subnet</th>';
-						echo '</tr>';
-					echo '</thead>';
-					echo '<tbody id="wps-subnets-table-body">';
-						foreach($subnets as $subnet){
-							echo '<tr>';
-								echo '<td>'.$subnet['start_ip'].'/'.$subnet['subnet'].'</td>';
-								echo '<td><span class="wps-remove" onclick="wps_remove_subnet(\''.$subnet['start_ip'].'\', \''.$subnet['subnet'].'\')"></span></td>';
-							echo '</tr>';
-						}
-					echo '</table>';
-				echo '</table>';
+			echo '<div class="wps-display-row">';
+				echo '<p>When a user logs into Wordpress, their IP will be authenticated for future<br>
+						access. You can control how long this IP should remain authenticated for.</p>';
+				echo '<a class="button button-primary" onclick="wps_save_settings()"/>Save Changes</a>';
 			echo '</div>';
 		}
-		public function wps_display_network_admin_screen(){
+		public function wps_display_single_site_access_screen(){
+			global $wpdb;
 
+			if(is_multisite()){
+				global $switched;
+				$currentBlogID = get_current_blog_id();
+				switch_to_blog(1);
+
+				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon WHERE blog_id = '".$currentBlogID."'";
+				$getPreviewHashQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Preview Hash' AND blog_id = '".$currentBlogID."'";
+				$getIPRangesQuery = "SELECT start_ip, end_ip, expires FROM ".$wpdb->prefix."wps_ip_ranges AND blog_id = '".$currentBlogID."'";
+				$getSubnetsQuery = "SELECT start_ip, subnet, expires FROM ".$wpdb->prefix."wps_subnets AND blog_id = '".$currentBlogID."'";
+				$checkDefaultEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled' AND blog_id = '".$currentBlogID."'";
+			}else{
+				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon";
+				$getPreviewHashQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Preview Hash'";
+				$getIPRangesQuery = "SELECT start_ip, end_ip, expires FROM ".$wpdb->prefix."wps_ip_ranges";
+				$getSubnetsQuery = "SELECT start_ip, subnet, expires FROM ".$wpdb->prefix."wps_subnets";
+				$checkDefaultEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled'";
+			}
+
+			$allValidatedUsers = $wpdb->get_results($getAllValidatedUsersQuery, ARRAY_A);
+			$previewHash = $wpdb->get_results($getPreviewHashQuery, ARRAY_A);
+			$ipRanges = $wpdb->get_results($getIPRangesQuery, ARRAY_A);
+			$subnets = $wpdb->get_results($getSubnetsQuery, ARRAY_A);
+			$checkDefaultEnabled = $wpdb->get_results($checkDefaultEnabledQuery, ARRAY_A);
+
+			if($checkDefaultEnabled[0]['setting_value'] == '0'){
+				echo '<div class="wps-disable-banner">';
+					echo 'WP Sandbox is currently <strong>DISABLED</strong>. Public users are able to access '.home_url('/');
+				echo '</div>';
+			}
+			echo '<div id="wps-ip-added-alert" class="updated">';
+				
+			echo '</div>';
+
+			echo '<div id="wps-ip-range-alert" class="updated">';
+
+			echo '</div>';
+
+			echo '<div id="wps-subnet-alert" class="updated">';
+
+			echo '</div>';
+			echo '<h2>Access Control</h2>';
+			echo '<div class="wps-left">';
+				echo '<h3>Add Single IP Address</h3>';
+
+				echo '<label class="wps-label">IP Address: </label><input id="wps-allowed-ip" name="wps-allowed-ip" /><br>';
+				echo '<label class="wps-label">Expiration: </label>';
+				echo '<select id="wps-add-ip-address-expiration">';
+					echo '<option value="day">Day</option>';
+					echo '<option value="week">Week</option>';
+					echo '<option value="twoweeks">Two Weeks</option>';
+					echo '<option value="month">Month</option>';
+					echo '<option value="never">Never</option>';
+				echo '</select>';
+				echo '<br>';
+				echo '<a class="button button-primary" onclick="wps_allow_ip()"/>Add IP</a>';
+
+				echo '<h3>Add IP Range</h3>';
+
+				echo '<label class="wps-label">From IP: </label><input id="wps-ip-range-start" name="wps-ip-range-start" /><br>';
+				echo '<label class="wps-label">To IP: </label><input id="wps-ip-range-end" name="wps-ip-range-end" /><br>';
+				echo '<label class="wps-label">Expiration: </label>';
+				echo '<select id="wps-add-ip-range-address-expiration">';
+					echo '<option value="day">Day</option>';
+					echo '<option value="week">Week</option>';
+					echo '<option value="twoweeks">Two Weeks</option>';
+					echo '<option value="month">Month</option>';
+					echo '<option value="never">Never</option>';
+				echo '</select>';
+				echo '<br>';
+				echo '<a class="button button-primary" onclick="wps_add_ip_range()"/>Add IP Range</a>';
+
+				echo '<h3>Add Network</h3>';
+				echo '<label class="wps-label">Network: </label><input id="wps-subnet-network" name="wps-subnet-network" /> / <input id="wps-subnet-network-subnet" name="wps-subnet-network-subnet" size="2"/><br>';
+				echo '<label class="wps-label">Expiration: </label>';
+				echo '<select id="wps-add-network-expiration">';
+					echo '<option value="day">Day</option>';
+					echo '<option value="week">Week</option>';
+					echo '<option value="twoweeks">Two Weeks</option>';
+					echo '<option value="month">Month</option>';
+					echo '<option value="never">Never</option>';
+				echo '</select>';
+				echo '<br>';
+				echo '<a class="button button-primary" onclick="wps_add_network()"/>Add Network</a>';
+			echo '</div>';
+			echo '<div class="wps-right">';
+				echo '<span class="wps-header">Share URL: </span><input id="wps-share-url" name="wps-share-url" value="'.home_url('/').'?wp-sandbox-preview='.$previewHash[0]['setting_value'].'"/><a class="button button-primary" onclick="wps_update_preview_hash()">Regenerate URL</a><br>';
+				echo '<p class="wps-description">Copy the URL above to share with users who need access without IP authentication. NOTE: Any user with this URL will be able to access the site unless the URL is regenerated.</p>';
+				echo '<table id="wps-access-table">';
+					echo '<thead>';
+						echo '<tr>';
+							echo '<th>Type</th>';
+							echo '<th>Network/IPs</th>';
+							echo '<th>Added By</th>';
+							echo '<th>Expires</th>';
+							echo '<th>Remove</th>';
+						echo '</tr>';
+					echo '</thead>';
+					echo '<tbody id="wps-access-table-body">';
+						foreach($allValidatedUsers as $validatedUser){
+							echo '<tr>';
+								echo '<td>Single IP</td>';
+								echo '<td>'.$validatedUser['ip'].'</td>';
+								echo '<td>'.$validatedUser['user_id'].'</td>';
+								echo '<td>'.$validatedUser['expires'].'</td>';
+								echo '<td><div class="wps-remove" onclick="wps_remove_user(\''.$validatedUser['user_id'].'\', \''.$validatedUser['ip'].'\')">&times;</div></td>';
+							echo '</tr>';
+						}
+						foreach($ipRanges as $ipRange){
+							echo '<tr>';
+								echo '<td>IP Range</td>';
+								echo '<td>'.$ipRange['start_ip'].' - '.$ipRange['end_ip'].'</td>';
+								echo '<td></td>';
+								echo '<td>'.$ipRange['expires'].'</td>';
+								echo '<td><div class="wps-remove" onclick="wps_remove_range(\''.$ipRange['start_ip'].'\', \''.$ipRange['end_ip'].'\')">&times;</div></td>';
+							echo '</tr>';
+						}
+						foreach($subnets as $subnet){
+							echo '<tr>';
+								echo '<td>Network</td>';
+								echo '<td>'.$subnet['start_ip'].'/'.$subnet['subnet'].'</td>';
+								echo '<td></td>';
+								echo '<td>'.$subnet['expires'].'</td>';
+								echo '<td><div class="wps-remove" onclick="wps_remove_subnet(\''.$subnet['start_ip'].'\', \''.$subnet['subnet'].'\')">&times;</div></td>';
+							echo '</tr>';
+						}
+					echo '</tbody>';
+				echo '</table>';
+			echo '</div>';
 		}
 	}
 ?>

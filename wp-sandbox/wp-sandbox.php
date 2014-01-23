@@ -51,16 +51,19 @@
 			*/
 			add_action('wp_ajax_wps_save_admin_settings', array($this, 'wps_save_admin_settings'));
 			add_action('wp_ajax_wps_remove_user', array($this, 'wps_remove_user'));
-			add_action('wp_ajax_wps_reload_users', array($this, 'wps_reload_users'));
+			add_action('wp_ajax_wps_network_remove_user', array($this, 'wps_network_remove_user'));
+			add_action('wp_ajax_wps_reload_access_table', array($this, 'wps_reload_access_table'));
+			add_action('wp_ajax_wps_reload_network_access_table', array($this, 'wps_reload_network_access_table'));
 			add_action('wp_ajax_wps_allow_ip', array($this, 'wps_allow_ip'));
 			add_action('wp_ajax_wps_generate_preview_hash_url', array($this, 'wps_generate_preview_hash_url'));
 			add_action('wp_ajax_wps_enable_plugin', array($this, 'wps_enable_plugin'));
 			add_action('wp_ajax_wps_save_ip_ranges', array($this, 'wps_save_ip_ranges'));
 			add_action('wp_ajax_wps_delete_ip_range', array($this, 'wps_delete_ip_range'));
-			add_action('wp_ajax_wps_reload_ip_range_table', array($this, 'wps_reload_ip_range_table'));
+			add_action('wp_ajax_wps_network_delete_ip_range', array($this, 'wps_network_delete_ip_range'));
 			add_action('wp_ajax_wps_save_subnets', array($this, 'wps_save_subnets'));
 			add_action('wp_ajax_wps_remove_subnet', array($this, 'wps_remove_subnet'));
-			add_action('wp_ajax_wps_reload_subnet_table', array($this, 'wps_reload_subnet_table'));
+			add_action('wp_ajax_wps_network_remove_subnet', array($this, 'wps_network_remove_subnet'));
+			add_action('wp_ajax_wps_network_enable_blogs', array($this, 'wps_network_enable_blogs'));
 
 			/*
 				Adds the notification to the admin bar if the plugin is activated.
@@ -75,7 +78,7 @@
 				global $wp_admin_bar;
 				$wp_admin_bar->add_menu( array(
 					'parent' => false, 
-					'id' => 1, 
+					'id' => 'wps-sandbox-admin-bar-notification', 
 					'title' => __('WP Sandbox Enabled'),
 					'href' => admin_url( 'options-general.php?page=wp-sandbox-settings-page'),
 					'meta' => array('class' => 'wps-admin-menu-notification')
@@ -134,7 +137,8 @@
 			Adds the plugin administration menu to the admin backend under Settings->WP Sandbox
 		*/
 		public function wps_plugin_settings() {
-			add_options_page('WP Sandbox', 'WP Sandbox', 'manage_options', 'wp-sandbox-settings-page', array($this, 'wps_settings_page'));
+			add_menu_page('WP Sandbox', 'WP Sandbox', 'manage_options', 'wps_sandbox', array($this, 'wps_settings_page'));
+			add_submenu_page('wps_sandbox', 'Access', 'Access', 'manage_options', 'wps_access', array($this, 'wps_access_page'));
 		}
 
 		/*
@@ -145,7 +149,18 @@
 				require('classes/class.wpsadmindisplay.php');
 			}
 			$adminDisplay = new WPSAdminDisplay();
-			$adminDisplay->wps_display_admin_screen();
+			$adminDisplay->wps_display_single_site_settings_screen();
+		}
+
+		/*
+			Displays the sandbox access page
+		*/
+		public function wps_access_page(){
+			if(!class_exists('WPSAdminDisplay')){
+				require('classes/class.wpsadmindisplay.php');
+			}
+			$adminDisplay = new WPSAdminDisplay();
+			$adminDisplay->wps_display_single_site_access_screen();
 		}
 		
 		//-------------------------------------------------------//
@@ -312,7 +327,6 @@
 				}else{
 					$insertValidIPQuery = "INSERT INTO ".$wpdb->prefix."wps_coming_soon (user_id, ip, expires) VALUES ('".$userID."', '".$ipAddress."', '".$expireTime."')";
 				}
-
 				$wpdb->query($insertValidIPQuery);
 
 				if(is_multisite()){
@@ -675,18 +689,9 @@
 			CALLED THROUGH AJAX
 		*/
 		public function wps_save_admin_settings(){
-			$setting = $_POST['setting'];
-
-			switch($setting){
-				case 'default_page':
-					$this->wps_save_default_page_setting();
-					echo 'true';
-				break;
-				case 'default_expire_time':
-					$this->wps_save_default_expire_time();
-					echo 'true';
-				break;
-			}
+			$this->wps_save_default_page_setting();
+			$this->wps_save_default_expire_time();
+			echo 'true';
 			die();
 		}
 
@@ -712,77 +717,9 @@
 			
 			$wpdb->query($deleteUserQuery);
 
-			if(is_multisite()){
-				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon WHERE blog_id = '".$currentBlogID."'";
-			}else{
-				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon";
-			}
-			
-			$allValidatedUsers = $wpdb->get_results($getAllValidatedUsersQuery, ARRAY_A);
-
-			if(is_multisite()){
-				restore_current_blog();
-			}
-
-			foreach($allValidatedUsers as $user){
-				$userInfo = get_userdata($user['user_id']);
-				echo '<tr>';
-					echo '<td>'.$userInfo->user_login.'</td>';
-					echo '<td>'.$user['ip'].'</td>';
-					echo '<td>'.$user['last_login'].'</td>';
-					
-					if($user['expires'] == '0000-00-00 00:00:00'){
-						echo '<td>Never</td>';
-					}else{
-						echo '<td>'.$user['expires'].'</td>';
-					}
-
-					echo '<td><span class="wps-remove" onclick="wps_remove_user('.$user['user_id'].', \''.$user['ip'].'\')"></span></td>';
-				echo '</tr>';
-			}
 			die();
 		}
 
-		/*
-			Reloads the users table on the administration side.
-			CALLED THROUGH AJAX
-		*/
-		public function wps_reload_users(){
-			global $wpdb;
-			if(is_multisite()){
-				global $switched;
-				$currentBlogID = get_current_blog_id();
-				switch_to_blog(1);
-
-				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon WHERE blog_id = '".$currentBlogID."'";
-			}else{
-				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon";
-			}
-			
-			$allValidatedUsers = $wpdb->get_results($getAllValidatedUsersQuery, ARRAY_A);
-
-			if(is_multisite()){
-				restore_current_blog();
-			}
-
-			foreach($allValidatedUsers as $user){
-				$userInfo = get_userdata($user['user_id']);
-				echo '<tr>';
-					echo '<td>'.$userInfo->user_login.'</td>';
-					echo '<td>'.$user['ip'].'</td>';
-					echo '<td>'.$user['last_login'].'</td>';
-					
-					if($user['expires'] == '0000-00-00 00:00:00'){
-						echo '<td>Never</td>';
-					}else{
-						echo '<td>'.$user['expires'].'</td>';
-					}
-
-					echo '<td><span class="wps-remove" onclick="wps_remove_user('.$user['user_id'].', \''.$user['ip'].'\')"></span></td>';
-				echo '</tr>';
-			}
-			die();
-		}
 
 		/*
 			Saves the IP Ranges
@@ -791,23 +728,42 @@
 		public function wps_save_ip_ranges(){
 			global $wpdb;
 
-			for($i=0; $i<count($_POST['start_range']); $i++){
-				if(is_multisite()){
-					global $switched;
-					$currentBlogID = get_current_blog_id();
-					switch_to_blog(1);
+			$expires = $_POST['expires'];
 
-					$insertIPRangeQuery = "INSERT INTO ".$wpdb->prefix."wps_ip_ranges (blog_id, start_ip, end_ip) VALUES ('".$currentBlogID."', '".mysql_real_escape_string($_POST['start_range'][$i])."', '".mysql_real_escape_string($_POST['end_range'][$i])."')";
-				}else{
-					$insertIPRangeQuery = "INSERT INTO ".$wpdb->prefix."wps_ip_ranges (start_ip, end_ip) VALUES ('".mysql_real_escape_string($_POST['start_range'][$i])."', '".mysql_real_escape_string($_POST['end_range'][$i])."')";
-				}
-				
-				$wpdb->query($insertIPRangeQuery);
-
-				if(is_multisite()){
-					restore_current_blog();
-				}
+			switch($expires){
+				case 'day':
+					$expireTime = date('Y-m-d G:i:s', time() + '86400');
+				break;
+				case 'week':
+					$expireTime = date('Y-m-d G:i:s', time() + '604800');
+				break;
+				case 'twoweeks':
+					$expireTime = date('Y-m-d G:i:s', time() + '1209600');
+				break;	
+				case 'month':
+					$expireTime = date('Y-m-d G:i:s', time() + '2592000');
+				break;
+				case 'never':
+					$expireTime = '';
+				break;
 			}
+
+			if(is_multisite()){
+				global $switched;
+				$currentBlogID = get_current_blog_id();
+				switch_to_blog(1);
+
+				$insertIPRangeQuery = "INSERT INTO ".$wpdb->prefix."wps_ip_ranges (blog_id, start_ip, end_ip, expires) VALUES ('".$currentBlogID."', '".mysql_real_escape_string($_POST['start_range'])."', '".mysql_real_escape_string($_POST['end_range'])."', '".$expireTime."')";
+			}else{
+				$insertIPRangeQuery = "INSERT INTO ".$wpdb->prefix."wps_ip_ranges (start_ip, end_ip, expires) VALUES ('".mysql_real_escape_string($_POST['start_range'])."', '".mysql_real_escape_string($_POST['end_range'])."', '".$expireTime."')";
+			}
+			
+			$wpdb->query($insertIPRangeQuery);
+
+			if(is_multisite()){
+				restore_current_blog();
+			}
+
 			die();
 		}
 		/*
@@ -931,7 +887,8 @@
 
 			$wps_ip_range_table = 'CREATE TABLE IF NOT EXISTS `'.$wps_ip_range_name.'` (
 			  `start_ip` varchar(20) NOT NULL,
-			  `end_ip` varchar(20) NOT NULL
+			  `end_ip` varchar(20) NOT NULL,
+			  `expires` DATETIME NOT NULL
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 
 			$wpdb->query($wps_ip_range_table);
@@ -940,7 +897,8 @@
 
 			$wps_subnet_table = 'CREATE TABLE IF NOT EXISTS `'.$wps_subnet_table.'` (
 			  `start_ip` varchar(20) NOT NULL,
-			  `subnet` varchar(2) NOT NULL
+			  `subnet` varchar(2) NOT NULL,
+			  `expires` DATETIME NOT NULL
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 	
 			$wpdb->query($wps_subnet_table);
@@ -1063,11 +1021,11 @@
 				$currentBlogID = get_current_blog_id();
 				switch_to_blog(1);
 
-				$enablePluginQuery = "UPDATE ".$wpdb->prefix."wps_coming_soon_settings SET setting_value = '".$enabled."' WHERE setting_name = 'Enabled' WHERE blog_id = '".$currentBlogID."'";
+				$enablePluginQuery = "UPDATE ".$wpdb->prefix."wps_coming_soon_settings SET setting_value = '".$enabled."' WHERE setting_name = 'Enabled' AND blog_id = '".$currentBlogID."'";
 			}else{
 				$enablePluginQuery = "UPDATE ".$wpdb->prefix."wps_coming_soon_settings SET setting_value = '".$enabled."' WHERE setting_name = 'Enabled'";
 			}
-			
+			echo $enablePluginQuery;
 			$wpdb->query($enablePluginQuery);
 
 			if(is_multisite()){
@@ -1104,60 +1062,49 @@
 			die();
 		}
 
-		/*
-			Reloads IP Table
-		*/
-		public function wps_reload_ip_range_table(){
-			global $wpdb;
-
-			if(is_multisite()){
-				global $switched;
-				$currentBlogID = get_current_blog_id();
-				switch_to_blog(1);
-
-				$getIPRangesQuery = "SELECT * FROM ".$wpdb->prefix."wps_ip_ranges AND blog_id '".$currentBlogID."'";
-			}else{
-				$getIPRangesQuery = "SELECT * FROM ".$wpdb->prefix."wps_ip_ranges";
-			}
-			
-			$ipRanges = $wpdb->get_results($getIPRangesQuery, ARRAY_A);
-
-			if(is_multisite()){
-				restore_current_blog();
-			}
-			foreach($ipRanges as $ipRange){
-				echo '<tr>';
-					echo '<td>'.$ipRange['start_ip'].'</td>';
-					echo '<td>'.$ipRange['end_ip'].'</td>';
-					echo '<td><span class="wps-remove" onclick="wps_remove_range(\''.$ipRange['start_ip'].'\', \''.$ipRange['end_ip'].'\')"></span></td>';
-				echo '</tr>';
-			}
-			die();
-		}
 
 		/*
 			Save Subnets
 		*/
 		public function wps_save_subnets(){
 			global $wpdb;
+			
+			$expires = $_POST['expiration'];
 
-			for($i=0; $i < count($_POST['ips']); $i++){
-				if(is_multisite()){
-					global $switched;
-					$currentBlogID = get_current_blog_id();
-					switch_to_blog(1);
-
-					$insertSubnetQuery = "INSERT INTO ".$wpdb->prefix."wps_subnets (blog_id, start_ip, subnet) VALUES ('".$currentBlogID."', '".mysql_real_escape_string($_POST['ips'][$i])."', '".mysql_real_escape_string($_POST['subnets'][$i])."')";
-				}else{
-					$insertSubnetQuery = "INSERT INTO ".$wpdb->prefix."wps_subnets (start_ip, subnet) VALUES ('".mysql_real_escape_string($_POST['ips'][$i])."', '".mysql_real_escape_string($_POST['subnets'][$i])."')";
-				}
-				
-				$wpdb->query($insertSubnetQuery);
-
-				if(is_multisite()){
-					restore_current_blog();
-				}
+			switch($expires){
+				case 'day':
+					$expireTime = date('Y-m-d G:i:s', time() + '86400');
+				break;
+				case 'week':
+					$expireTime = date('Y-m-d G:i:s', time() + '604800');
+				break;
+				case 'twoweeks':
+					$expireTime = date('Y-m-d G:i:s', time() + '1209600');
+				break;	
+				case 'month':
+					$expireTime = date('Y-m-d G:i:s', time() + '2592000');
+				break;
+				case 'never':
+					$expireTime = '';
+				break;
 			}
+
+			if(is_multisite()){
+				global $switched;
+				$currentBlogID = get_current_blog_id();
+				switch_to_blog(1);
+
+				$insertSubnetQuery = "INSERT INTO ".$wpdb->prefix."wps_subnets (blog_id, start_ip, subnet, expires) VALUES ('".$currentBlogID."', '".mysql_real_escape_string($_POST['ip'])."', '".mysql_real_escape_string($_POST['subnet'])."', '".$expireTime."')";
+			}else{
+				$insertSubnetQuery = "INSERT INTO ".$wpdb->prefix."wps_subnets (start_ip, subnet, expires) VALUES ('".mysql_real_escape_string($_POST['ip'])."', '".mysql_real_escape_string($_POST['subnet'])."', '".$expireTime."')";
+			}
+			
+			$wpdb->query($insertSubnetQuery);
+
+			if(is_multisite()){
+				restore_current_blog();
+			}
+
 			die();
 		}
 
@@ -1185,35 +1132,62 @@
 			die();
 		}
 
-		/*
-			Reload Subnet Table
-		*/
-		public function wps_reload_subnet_table(){
+		public function wps_reload_access_table(){
 			global $wpdb;
 
 			if(is_multisite()){
 				global $switched;
 				$currentBlogID = get_current_blog_id();
 				switch_to_blog(1);
-			
+
 				$getSubnetsQuery = "SELECT * FROM ".$wpdb->prefix."wps_subnets WHERE blog_id = '".$currentBlogID."'";
+				$getIPRangesQuery = "SELECT * FROM ".$wpdb->prefix."wps_ip_ranges AND blog_id '".$currentBlogID."'";
+				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon WHERE blog_id = '".$currentBlogID."'";
 			}else{
 				$getSubnetsQuery = "SELECT * FROM ".$wpdb->prefix."wps_subnets";
+				$getIPRangesQuery = "SELECT * FROM ".$wpdb->prefix."wps_ip_ranges";
+				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon";
 			}
 
 			$subnets = $wpdb->get_results($getSubnetsQuery, ARRAY_A);
+			$ipRanges = $wpdb->get_results($getIPRangesQuery, ARRAY_A);
+			$validatedUsers = $wpdb->get_results($getAllValidatedUsersQuery, ARRAY_A);
+
+			foreach($validatedUsers as $validatedUser){
+				echo '<tr>';
+					echo '<td>Single IP</td>';
+					echo '<td>'.$validatedUser['ip'].'</td>';
+					echo '<td>'.$validatedUser['user_id'].'</td>';
+					echo '<td>'.$validatedUser['expires'].'</td>';
+					echo '<td><div class="wps-remove" onclick="wps_remove_user(\''.$validatedUser['user_id'].'\', \''.$validatedUser['ip'].'\')">&times;</div></td>';
+				echo '</tr>';
+			}
+			foreach($ipRanges as $ipRange){
+				echo '<tr>';
+					echo '<td>IP Range</td>';
+					echo '<td>'.$ipRange['start_ip'].' - '.$ipRange['end_ip'].'</td>';
+					echo '<td></td>';
+					echo '<td>'.$ipRange['expires'].'</td>';
+					echo '<td><div class="wps-remove" onclick="wps_remove_range(\''.$ipRange['start_ip'].'\', \''.$ipRange['end_ip'].'\')">&times;</div></td>';
+				echo '</tr>';
+			}
+			foreach($subnets as $subnet){
+				echo '<tr>';
+					echo '<td>Network</td>';
+					echo '<td>'.$subnet['start_ip'].'/'.$subnet['subnet'].'</td>';
+					echo '<td></td>';
+					echo '<td>'.$subnet['expires'].'</td>';
+					echo '<td><div class="wps-remove" onclick="wps_remove_subnet(\''.$subnet['start_ip'].'\', \''.$subnet['subnet'].'\')">&times;</div></td>';
+				echo '</tr>';
+			}
 
 			if(is_multisite()){
 				restore_current_blog();
 			}
-			foreach($subnets as $subnet){
-				echo '<tr>';
-					echo '<td>'.$subnet['start_ip'].'/'.$subnet['subnet'].'</td>';
-					echo '<td><span class="wps-remove" onclick="wps_remove_subnet(\''.$subnet['start_ip'].'\', \''.$subnet['subnet'].'\')"></span></td>';
-				echo '</tr>';
-			}
+
 			die();
 		}
+
 		//-------------------------------------------------------//
 		/* MULTISITE FUNCTIONALITY */
 
@@ -1232,7 +1206,7 @@
 				require('classes/class.wpsadmindisplay.php');
 			}
 			$adminDisplay = new WPSAdminDisplay();
-			$adminDisplay->wps_display_admin_screen();
+			$adminDisplay->wps_display_network_admin_screen();
 		}
 
 		/*
@@ -1272,7 +1246,8 @@
 			$wps_ip_range_table = 'CREATE TABLE IF NOT EXISTS `'.$wps_ip_range_name.'` (
 			  `blog_id` int(11) NOT NULL,
 			  `start_ip` varchar(20) NOT NULL,
-			  `end_ip` varchar(20) NOT NULL
+			  `end_ip` varchar(20) NOT NULL,
+			  `expires` DATETIME NOT NULL
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 
 			$wpdb->query($wps_ip_range_table);
@@ -1282,7 +1257,8 @@
 			$wps_subnet_table = 'CREATE TABLE IF NOT EXISTS `'.$wps_subnet_table.'` (
 			  `blog_id` int(11) NOT NULL,
 			  `start_ip` varchar(20) NOT NULL,
-			  `subnet` varchar(2) NOT NULL
+			  `subnet` varchar(2) NOT NULL,
+			  `expires` DATETIME NOT NULL
 			) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 	
 			$wpdb->query($wps_subnet_table);
@@ -1349,6 +1325,100 @@
 					$wpdb->query($addDefaultEnabled);
 				}
 			}
+		}
+		public function wps_network_enable_blogs(){
+			global $wpdb;
+			$wps_enable_sites = $_POST['enabled_sites'];
+
+			$clearOldSiteEnabledSettingsQuery = "UPDATE ".$wpdb->prefix."wps_coming_soon_settings SET setting_value = '0' WHERE setting_name = 'Enabled'";
+			$wpdb->query($clearOldSiteEnabledSettingsQuery);
+
+			foreach($wps_enable_sites as $wps_enabled_site){
+				$enableSiteQuery = "UPDATE ".$wpdb->prefix."wps_coming_soon_settings SET setting_value = '1' WHERE setting_name = 'Enabled' AND blog_id = '".$wps_enabled_site."'";
+				$wpdb->query($enableSiteQuery);
+			}
+			die();
+		}
+		public function wps_network_remove_user(){
+			global $wpdb;
+
+			$userID = $_POST['wps_user_id'];
+			$ip = $_POST['wps_ip'];
+			$blog = $_POST['wps_blog'];
+
+			$deleteUserQuery = "DELETE FROM ".$wpdb->prefix."wps_coming_soon WHERE user_id = '".$userID."' AND ip = '".$ip."' AND blog_id = '".$blog."'";
+			$wpdb->query($deleteUserQuery);
+
+			echo $deleteUserQuery;
+			die();
+		}
+		public function wps_network_delete_ip_range(){
+			global $wpdb;
+
+			$start = $_POST['start'];
+			$end = $_POST['end'];
+			$blog_id = $_POST['blog_id'];
+
+			$deleteIPRangeQuery = "DELETE FROM ".$wpdb->prefix."wps_ip_ranges WHERE start_ip = '".$start."' AND end_ip = '".$end."' AND blog_id = '".$blog_id."'";
+			$wpdb->query($deleteIPRangeQuery);
+
+			die();
+		}
+		public function wps_network_remove_subnet(){
+			global $wpdb;
+
+			$start = $_POST['start_ip'];
+			$subnet = $_POST['subnet_extension'];
+			$blog_id = $_POST['blog_id'];
+
+			$deleteSubnetQuery = "DELETE FROM ".$wpdb->prefix."wps_subnets WHERE start_ip = '".$start."' AND subnet = '".$subnet."' AND blog_id = '".$blog_id."'";
+			$wpdb->query($deleteSubnetQuery);
+
+			die();
+		}
+		public function wps_reload_network_access_table(){
+			global $wpdb;
+
+			$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon";
+			$getIPRangesQuery = "SELECT * FROM ".$wpdb->prefix."wps_ip_ranges";
+			$getSubnetsQuery = "SELECT * FROM ".$wpdb->prefix."wps_subnets";
+
+			$allValidatedUsers = $wpdb->get_results($getAllValidatedUsersQuery, ARRAY_A);
+			$ipRanges = $wpdb->get_results($getIPRangesQuery, ARRAY_A);
+			$subnets = $wpdb->get_results($getSubnetsQuery, ARRAY_A);
+
+			foreach($allValidatedUsers as $validatedUser){
+				$blogInfo = get_blog_details($validatedUser['blog_id']);
+				echo '<tr>';
+					echo '<td>http://'.$blogInfo->domain.'</td>';
+					echo '<td>Single</td>';
+					echo '<td>'.$validatedUser['ip'].'</td>';
+					echo '<td>'.$validatedUser['expires'].'</td>';
+					echo '<td><div class="wps-remove" onclick="wps_network_remove_user(\''.$validatedUser['blog_id'].'\', \''.$validatedUser['user_id'].'\', \''.$validatedUser['ip'].'\')">&times;</div></td>';
+				echo '</tr>';
+			}
+			foreach($ipRanges as $ipRange){
+				$blogInfo = get_blog_details($ipRange['blog_id']);
+				echo '<tr>';
+					echo '<td>http://'.$blogInfo->domain.'</td>';
+					echo '<td>Range</td>';
+					echo '<td>'.$ipRange['start_ip'].' - '.$ipRange['end_ip'].'</td>';
+					echo '<td>'.$ipRange['expires'].'</td>';
+					echo '<td><div class="wps-remove" onclick="wps_network_remove_range(\''.$ipRange['blog_id'].'\', \''.$ipRange['start_ip'].'\', \''.$ipRange['end_ip'].'\')">&times;</div></td>';
+				echo '</tr>';
+			}
+			foreach($subnets as $subnet){
+				$blogInfo = get_blog_details($subnet['blog_id']);
+				echo '<tr>';
+					echo '<td>http://'.$blogInfo->domain.'</td>';
+					echo '<td>Network</td>';
+					echo '<td>'.$subnet['start_ip'].'/'.$subnet['subnet'].'</td>';
+					echo '<td>'.$subnet['expires'].'</td>';
+					echo '<td><div class="wps-remove" onclick="wps_network_remove_subnet(\''.$subnet['blog_id'].'\', \''.$subnet['start_ip'].'\', \''.$subnet['subnet'].'\')">&times;</div></td>';
+				echo '</tr>';
+			}
+
+			die();
 		}
 	}
 	$wpSandbox = new WPSandbox();
