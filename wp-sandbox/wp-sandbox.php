@@ -74,16 +74,14 @@
 		}
 
 		public function wps_admin_bar_notification() {
-			if($this->wps_check_plugin_enabled()){
-				global $wp_admin_bar;
-				$wp_admin_bar->add_menu( array(
-					'parent' => false, 
-					'id' => 'wps-sandbox-admin-bar-notification', 
-					'title' => __('WP Sandbox Enabled'),
-					'href' => admin_url( 'options-general.php?page=wp-sandbox-settings-page'),
-					'meta' => array('class' => 'wps-admin-menu-notification')
-				));
-			}
+			global $wp_admin_bar;
+			$wp_admin_bar->add_menu( array(
+				'parent' => false, 
+				'id' => 'wps-sandbox-admin-bar-notification', 
+				'title' => __('WP Sandbox Enabled'),
+				'href' => admin_url( 'admin.php?page=wps_sandbox'),
+				'meta' => array('class' => 'wps-admin-menu-notification ab-top-secondary')
+			));
 		}
 
 		public function __destruct(){
@@ -137,7 +135,7 @@
 			Adds the plugin administration menu to the admin backend under Settings->WP Sandbox
 		*/
 		public function wps_plugin_settings() {
-			add_menu_page('WP Sandbox', 'WP Sandbox', 'manage_options', 'wps_sandbox', array($this, 'wps_settings_page'));
+			add_menu_page('WP Sandbox', 'WP Sandbox', 'manage_options', 'wps_sandbox', array($this, 'wps_settings_page'), plugins_url().'/wp-sandbox/images/wp-sandbox-logo.png');
 			add_submenu_page('wps_sandbox', 'Access', 'Access', 'manage_options', 'wps_access', array($this, 'wps_access_page'));
 		}
 
@@ -1154,11 +1152,16 @@
 			$validatedUsers = $wpdb->get_results($getAllValidatedUsersQuery, ARRAY_A);
 
 			foreach($validatedUsers as $validatedUser){
+				$user = get_userdata( $validatedUser['user_id']);
 				echo '<tr>';
 					echo '<td>Single IP</td>';
 					echo '<td>'.$validatedUser['ip'].'</td>';
-					echo '<td>'.$validatedUser['user_id'].'</td>';
-					echo '<td>'.$validatedUser['expires'].'</td>';
+					echo '<td>'.$user->user_login.'</td>';
+					if($validatedUser['expires'] == '0000-00-00 00:00:00'){
+						echo '<td>Never</td>';
+					}else{
+						echo '<td>'.$validatedUser['expires'].'</td>';
+					}
 					echo '<td><div class="wps-remove" onclick="wps_remove_user(\''.$validatedUser['user_id'].'\', \''.$validatedUser['ip'].'\')">&times;</div></td>';
 				echo '</tr>';
 			}
@@ -1389,12 +1392,17 @@
 
 			foreach($allValidatedUsers as $validatedUser){
 				$blogInfo = get_blog_details($validatedUser['blog_id']);
+				$user = get_userdata( $validatedUser['user_id']);
 				echo '<tr>';
-					echo '<td>http://'.$blogInfo->domain.'</td>';
-					echo '<td>Single</td>';
+					echo '<td>Single IP</td>';
 					echo '<td>'.$validatedUser['ip'].'</td>';
-					echo '<td>'.$validatedUser['expires'].'</td>';
-					echo '<td><div class="wps-remove" onclick="wps_network_remove_user(\''.$validatedUser['blog_id'].'\', \''.$validatedUser['user_id'].'\', \''.$validatedUser['ip'].'\')">&times;</div></td>';
+					echo '<td>'.$user->user_login.'</td>';
+					if($validatedUser['expires'] == '0000-00-00 00:00:00'){
+						echo '<td>Never</td>';
+					}else{
+						echo '<td>'.$validatedUser['expires'].'</td>';
+					}
+					echo '<td><div class="wps-remove" onclick="wps_remove_user(\''.$validatedUser['user_id'].'\', \''.$validatedUser['ip'].'\')">&times;</div></td>';
 				echo '</tr>';
 			}
 			foreach($ipRanges as $ipRange){

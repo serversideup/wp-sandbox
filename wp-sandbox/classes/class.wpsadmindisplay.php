@@ -140,6 +140,11 @@
 				echo '<div class="wps-disable-banner" style="display:none">';
 					echo 'WP Sandbox is currently <strong>DISABLED</strong>. Public users are able to access '.home_url('/');
 				echo '</div>';
+				echo '<script type="text/javascript">';
+					echo 'jQuery(document).ready(function(){';
+						echo 'jQuery("#wp-admin-bar-wps-sandbox-admin-bar-notification").show()';
+					echo '});';
+				echo '</script>';
 			}
 			echo '<div id="wps-settings-saved" class="updated">';
 				echo 'WP Sandbox settings saved';
@@ -333,11 +338,16 @@
 					echo '</thead>';
 					echo '<tbody id="wps-access-table-body">';
 						foreach($allValidatedUsers as $validatedUser){
+							$user = get_userdata( $validatedUser['user_id']);
 							echo '<tr>';
 								echo '<td>Single IP</td>';
 								echo '<td>'.$validatedUser['ip'].'</td>';
-								echo '<td>'.$validatedUser['user_id'].'</td>';
-								echo '<td>'.$validatedUser['expires'].'</td>';
+								echo '<td>'.$user->user_login.'</td>';
+								if($validatedUser['expires'] == '0000-00-00 00:00:00'){
+									echo '<td>Never</td>';
+								}else{
+									echo '<td>'.$validatedUser['expires'].'</td>';
+								}
 								echo '<td><div class="wps-remove" onclick="wps_remove_user(\''.$validatedUser['user_id'].'\', \''.$validatedUser['ip'].'\')">&times;</div></td>';
 							echo '</tr>';
 						}

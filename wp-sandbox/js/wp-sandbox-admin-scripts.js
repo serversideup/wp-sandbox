@@ -18,6 +18,7 @@ jQuery(function(){
 				async: false
 			}).done(function(response){
 				jQuery('.wps-disable-banner').hide();
+				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').show();
 			});
         }else{
         	var data = {
@@ -31,6 +32,7 @@ jQuery(function(){
 				async: false
 			}).done(function(response){
 				jQuery('.wps-disable-banner').show();
+				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').hide();
 			});
         }
     });
