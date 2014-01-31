@@ -248,12 +248,14 @@
 				$getPreviewHashQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Preview Hash' AND blog_id = '".$currentBlogID."'";
 				$getIPRangesQuery = "SELECT start_ip, end_ip, expires FROM ".$wpdb->prefix."wps_ip_ranges AND blog_id = '".$currentBlogID."'";
 				$getSubnetsQuery = "SELECT start_ip, subnet, expires FROM ".$wpdb->prefix."wps_subnets AND blog_id = '".$currentBlogID."'";
+				$checkDefaultWPSExpireQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Expiration Time' AND blog_id = '".$currentBlogID."'";
 				$checkDefaultEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled' AND blog_id = '".$currentBlogID."'";
 			}else{
 				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon";
 				$getPreviewHashQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Preview Hash'";
 				$getIPRangesQuery = "SELECT start_ip, end_ip, expires FROM ".$wpdb->prefix."wps_ip_ranges";
 				$getSubnetsQuery = "SELECT start_ip, subnet, expires FROM ".$wpdb->prefix."wps_subnets";
+				$checkDefaultWPSExpireQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Expiration Time'";
 				$checkDefaultEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled'";
 			}
 
@@ -262,6 +264,7 @@
 			$ipRanges = $wpdb->get_results($getIPRangesQuery, ARRAY_A);
 			$subnets = $wpdb->get_results($getSubnetsQuery, ARRAY_A);
 			$checkDefaultEnabled = $wpdb->get_results($checkDefaultEnabledQuery, ARRAY_A);
+			$checkDefaultWPSExpire = $wpdb->get_results($checkDefaultWPSExpireQuery, ARRAY_A);
 
 			if($checkDefaultEnabled[0]['setting_value'] == '0'){
 				echo '<div class="wps-disable-banner">';
@@ -286,11 +289,35 @@
 				echo '<label class="wps-label">IP Address: </label><input id="wps-allowed-ip" name="wps-allowed-ip" /><br>';
 				echo '<label class="wps-label">Expiration: </label>';
 				echo '<select id="wps-add-ip-address-expiration">';
-					echo '<option value="day">Day</option>';
-					echo '<option value="week">Week</option>';
-					echo '<option value="twoweeks">Two Weeks</option>';
-					echo '<option value="month">Month</option>';
-					echo '<option value="never">Never</option>';
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'day'){
+							echo '<option value="day" selected>Day</option>';
+						}else{
+							echo '<option value="day">Day</option>';
+						}
+						
+						if($checkDefaultWPSExpire[0]['setting_value'] == 'week'){
+							echo '<option value="week" selected>Week</option>';
+						}else{
+							echo '<option value="week">Week</option>';
+						}
+						
+						if($checkDefaultWPSExpire[0]['setting_value'] == 'twoweeks'){
+							echo '<option value="twoweeks" selected>Two Weeks</option>';
+						}else{
+							echo '<option value="twoweeks">Two Weeks</option>';
+						}
+						
+						if($checkDefaultWPSExpire[0]['setting_value'] == 'month'){
+							echo '<option value="month" selected>Month</option>';
+						}else{
+							echo '<option value="month">Month</option>';
+						}
+						
+						if($checkDefaultWPSExpire[0]['setting_value'] == 'never'){
+							echo '<option value="never" selected>Never Expire</option>';
+						}else{
+							echo '<option value="never">Never Expire</option>';
+						}
 				echo '</select>';
 				echo '<br>';
 				echo '<a class="button button-primary" onclick="wps_allow_ip()"/>Add IP</a>';
@@ -301,11 +328,35 @@
 				echo '<label class="wps-label">To IP: </label><input id="wps-ip-range-end" name="wps-ip-range-end" /><br>';
 				echo '<label class="wps-label">Expiration: </label>';
 				echo '<select id="wps-add-ip-range-address-expiration">';
-					echo '<option value="day">Day</option>';
-					echo '<option value="week">Week</option>';
-					echo '<option value="twoweeks">Two Weeks</option>';
-					echo '<option value="month">Month</option>';
-					echo '<option value="never">Never</option>';
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'day'){
+						echo '<option value="day" selected>Day</option>';
+					}else{
+						echo '<option value="day">Day</option>';
+					}
+					
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'week'){
+						echo '<option value="week" selected>Week</option>';
+					}else{
+						echo '<option value="week">Week</option>';
+					}
+					
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'twoweeks'){
+						echo '<option value="twoweeks" selected>Two Weeks</option>';
+					}else{
+						echo '<option value="twoweeks">Two Weeks</option>';
+					}
+					
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'month'){
+						echo '<option value="month" selected>Month</option>';
+					}else{
+						echo '<option value="month">Month</option>';
+					}
+					
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'never'){
+						echo '<option value="never" selected>Never Expire</option>';
+					}else{
+						echo '<option value="never">Never Expire</option>';
+					}
 				echo '</select>';
 				echo '<br>';
 				echo '<a class="button button-primary" onclick="wps_add_ip_range()"/>Add IP Range</a>';
@@ -314,11 +365,35 @@
 				echo '<label class="wps-label">Network: </label><input id="wps-subnet-network" name="wps-subnet-network" /> / <input id="wps-subnet-network-subnet" name="wps-subnet-network-subnet" size="2"/><br>';
 				echo '<label class="wps-label">Expiration: </label>';
 				echo '<select id="wps-add-network-expiration">';
-					echo '<option value="day">Day</option>';
-					echo '<option value="week">Week</option>';
-					echo '<option value="twoweeks">Two Weeks</option>';
-					echo '<option value="month">Month</option>';
-					echo '<option value="never">Never</option>';
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'day'){
+						echo '<option value="day" selected>Day</option>';
+					}else{
+						echo '<option value="day">Day</option>';
+					}
+					
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'week'){
+						echo '<option value="week" selected>Week</option>';
+					}else{
+						echo '<option value="week">Week</option>';
+					}
+					
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'twoweeks'){
+						echo '<option value="twoweeks" selected>Two Weeks</option>';
+					}else{
+						echo '<option value="twoweeks">Two Weeks</option>';
+					}
+					
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'month'){
+						echo '<option value="month" selected>Month</option>';
+					}else{
+						echo '<option value="month">Month</option>';
+					}
+					
+					if($checkDefaultWPSExpire[0]['setting_value'] == 'never'){
+						echo '<option value="never" selected>Never Expire</option>';
+					}else{
+						echo '<option value="never">Never Expire</option>';
+					}
 				echo '</select>';
 				echo '<br>';
 				echo '<a class="button button-primary" onclick="wps_add_network()"/>Add Network</a>';

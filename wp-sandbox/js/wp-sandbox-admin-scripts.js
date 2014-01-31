@@ -214,35 +214,99 @@ function wps_save_default_expire_time(){
 	Allows a static IP
 */
 function wps_allow_ip(){
-	var data = {
-		action: 'wps_allow_ip',
-		ip: jQuery('#wps-allowed-ip').val(),
-		expires: jQuery('#wps-add-ip-address-expiration').val()
+	if(wps_check_valid_ip(jQuery('#wps-allowed-ip').val())) {
+		jQuery('#wps-allowed-ip').css('border', '1px solid green');
+		var data = {
+			action: 'wps_allow_ip',
+			ip: jQuery('#wps-allowed-ip').val(),
+			expires: jQuery('#wps-add-ip-address-expiration').val()
+		}
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			data: data,
+			async: false
+		}).done(function(response){
+			if(response == 'true'){
+				jQuery('#wps-ip-added-alert').html('IP Address Added');
+				jQuery('#wps-ip-added-alert').removeClass('error');
+				jQuery('#wps-ip-added-alert').addClass('updated');
+				jQuery('#wps-ip-added-alert').show();
+				jQuery('#wps-ip-added-alert').fadeOut(3000);
+				wps_reload_access_table();
+			}
+			if(response == 'false'){
+				jQuery('#wps-ip-added-alert').html('IP Already Exists');
+				jQuery('#wps-ip-added-alert').removeClass('updated');
+				jQuery('#wps-ip-added-alert').addClass('error');
+				jQuery('#wps-ip-added-alert').show();
+				jQuery('#wps-ip-added-alert').fadeOut(3000);
+			}
+		});
+	}else{
+		jQuery('#wps-allowed-ip').css('border', '1px solid red');
+		jQuery('#wps-ip-added-alert').html('IP Invalid');
+		jQuery('#wps-ip-added-alert').removeClass('updated');
+		jQuery('#wps-ip-added-alert').addClass('error');
+		jQuery('#wps-ip-added-alert').show();
+		jQuery('#wps-ip-added-alert').fadeOut(3000);
 	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		if(response == 'true'){
-			jQuery('#wps-ip-added-alert').html('IP Address Added');
-			jQuery('#wps-ip-added-alert').removeClass('error');
-			jQuery('#wps-ip-added-alert').addClass('updated');
-			jQuery('#wps-ip-added-alert').show();
-			jQuery('#wps-ip-added-alert').fadeOut(3000);
-			wps_reload_access_table();
-		}
-		if(response == 'false'){
-			jQuery('#wps-ip-added-alert').html('IP Already Exists');
-			jQuery('#wps-ip-added-alert').removeClass('updated');
-			jQuery('#wps-ip-added-alert').addClass('error');
-			jQuery('#wps-ip-added-alert').show();
-			jQuery('#wps-ip-added-alert').fadeOut(3000);
-		}
-	})
 }
 
+function wps_check_valid_ip(ip_address){
+	var ip_parts = ip_address.split('.');
+	if(ip_parts.length == 4){
+		if((ip_parts[0] >= 0) && (ip_parts[0] <= 255)){
+			if((ip_parts[1] >= 0) && (ip_parts[1] <= 255)){
+				if((ip_parts[2] >= 0) && (ip_parts[2] <= 255)){
+					if((ip_parts[3] >= 0) && (ip_parts[3] <= 255)){
+						return true;
+					}else{
+						return false;
+					}
+				}else{
+					return false;
+				}
+			}else{
+				return false;
+			}
+		}else{
+			return false;
+		}
+	}else{
+		return false;
+	}
+}
+
+function wps_check_valid_range(ip_start, ip_end){
+	var ip_start_parts = ip_start.split('.');
+	var ip_end_parts = ip_end.split('.');
+	if(ip_end_parts[0] > ip_start_parts[0]){
+		return true;
+	}else{
+		if((ip_end_parts[0] == ip_start_parts[0]) && (ip_end_parts[1] > ip_start_parts[1])){
+			return true;
+		}else{
+			if((ip_end_parts[0] == ip_start_parts[0]) && (ip_end_parts[1] == ip_start_parts[1]) && (ip_end_parts[2] > ip_start_parts[2])){
+				return true;
+			}else{
+				if((ip_end_parts[0] == ip_start_parts[0]) && (ip_end_parts[1] == ip_start_parts[1]) && (ip_end_parts[2] == ip_start_parts[2]) && (ip_end_parts[3] > ip_start_parts[3])){
+					return true;
+				}else{
+					return false;
+				}
+			}
+		}
+	}
+}
+
+function wps_check_valid_subnet(subnet){
+	if((subnet >= 0) && (subnet <= 32) && (subnet != '')){
+		return true;
+	}else{
+		return false;
+	}
+}
 /*
 	Updates a valid preview hash
 */
@@ -269,24 +333,54 @@ function wps_add_ip_range(){
 	var start = jQuery('#wps-ip-range-start').val();
 	var end = jQuery('#wps-ip-range-end').val();
 	var expire_time = jQuery('#wps-add-ip-range-address-expiration').val();
+	if(wps_check_valid_ip(start)){
+		jQuery('#wps-ip-range-start').css('border', '1px solid green');
+		if(wps_check_valid_ip(end)){
+			jQuery('#wps-ip-range-end').css('border', '1px solid green');
+			if(wps_check_valid_range(start, end)){
+				var data = {
+					action: 'wps_save_ip_ranges',
+					start_range: start,
+					end_range: end,
+					expires: expire_time
+				}
+				jQuery.ajax({
+					type: 'POST',
+					url: ajaxurl,
+					data: data,
+					async: false
+				}).done(function(response){
+					jQuery('#wps-ip-range-alert').html('IP Range Added!');
+					jQuery('#wps-ip-range-alert').show();
+					jQuery('#wps-ip-range-alert').fadeOut(3000);
+					wps_reload_access_table();
+				});
+			}else{
+				jQuery('#wps-ip-range-start').css('border', '1px solid red');
+				jQuery('#wps-ip-range-end').css('border', '1px solid red');
 
-	var data = {
-		action: 'wps_save_ip_ranges',
-		start_range: start,
-		end_range: end,
-		expires: expire_time
-	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		jQuery('#wps-ip-range-alert').html('IP Range Added!');
+				jQuery('#wps-ip-range-alert').html('Invalid Range');
+				jQuery('#wps-ip-range-alert').removeClass('updated');
+				jQuery('#wps-ip-range-alert').addClass('error');
+				jQuery('#wps-ip-range-alert').show();
+				jQuery('#wps-ip-range-alert').fadeOut(3000);
+			}
+		}else{
+			jQuery('#wps-ip-range-end').css('border', '1px solid red');
+			jQuery('#wps-ip-range-alert').html('IP Invalid');
+			jQuery('#wps-ip-range-alert').removeClass('updated');
+			jQuery('#wps-ip-range-alert').addClass('error');
+			jQuery('#wps-ip-range-alert').show();
+			jQuery('#wps-ip-range-alert').fadeOut(3000);
+		}
+	}else{
+		jQuery('#wps-ip-range-start').css('border', '1px solid red');
+		jQuery('#wps-ip-range-alert').html('IP Invalid');
+		jQuery('#wps-ip-range-alert').removeClass('updated');
+		jQuery('#wps-ip-range-alert').addClass('error');
 		jQuery('#wps-ip-range-alert').show();
 		jQuery('#wps-ip-range-alert').fadeOut(3000);
-		wps_reload_access_table();
-	});
+	}
 }
 
 /*
@@ -329,23 +423,43 @@ function wps_network_remove_range(blog, start_ip, end_ip){
 	Saves Subnets
 */
 function wps_add_network(){
-	var data = {
-		action: 'wps_save_subnets',
-		ip: jQuery('#wps-subnet-network').val(),
-		subnet: jQuery('#wps-subnet-network-subnet').val(),
-		expiration: jQuery('#wps-add-network-expiration').val()
-	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		jQuery('#wps-subnet-alert').html('Subnet Added!');
+	if(wps_check_valid_ip(jQuery('#wps-subnet-network').val())){
+		jQuery('#wps-subnet-network').css('border', '1px solid green');
+		if(wps_check_valid_subnet(jQuery('#wps-subnet-network-subnet').val())){
+			jQuery('#wps-subnet-network-subnet').css('border', '1px solid green');
+			var data = {
+				action: 'wps_save_subnets',
+				ip: jQuery('#wps-subnet-network').val(),
+				subnet: jQuery('#wps-subnet-network-subnet').val(),
+				expiration: jQuery('#wps-add-network-expiration').val()
+			}
+			jQuery.ajax({
+				type: 'POST',
+				url: ajaxurl,
+				data: data,
+				async: false
+			}).done(function(response){
+				jQuery('#wps-subnet-alert').html('Subnet Added!');
+				jQuery('#wps-subnet-alert').show();
+				jQuery('#wps-subnet-alert').fadeOut(3000);
+				wps_reload_access_table();
+			});
+		}else{
+			jQuery('#wps-subnet-network-subnet').css('border', '1px solid red');
+			jQuery('#wps-subnet-alert').html('Subnet Invalid');
+			jQuery('#wps-subnet-alert').removeClass('updated');
+			jQuery('#wps-subnet-alert').addClass('error');
+			jQuery('#wps-subnet-alert').show();
+			jQuery('#wps-subnet-alert').fadeOut(3000);
+		}
+	}else{
+		jQuery('#wps-subnet-network').css('border', '1px solid red');
+		jQuery('#wps-subnet-alert').html('IP Invalid');
+		jQuery('#wps-subnet-alert').removeClass('updated');
+		jQuery('#wps-subnet-alert').addClass('error');
 		jQuery('#wps-subnet-alert').show();
 		jQuery('#wps-subnet-alert').fadeOut(3000);
-		wps_reload_access_table();
-	});
+	}
 }
 
 /*
