@@ -98,7 +98,6 @@ label.wps-label{
     display: none;
 }
 #wp-admin-bar-wps-sandbox-admin-bar-notification{
-    display: none;
     background: #ff4343 !important; /* Old browsers */ 
     background: -moz-linear-gradient(top,  #ff4343 0%, #ef2424 50%, #e20a0a 100%) !important; /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ff4343), color-stop(50%,#ef2424), color-stop(100%,#e20a0a)) !important; /* Chrome,Safari4+ */
@@ -190,6 +189,8 @@ label.wps-label{
 }
 #wps-plugin-status-network-table{
     border-collapse: collapse;
+    margin-left: 300px;
+    margin-top: -35px;
 }
 #wps-plugin-status-network-table thead tr th{
     padding: 10px;
@@ -235,4 +236,7 @@ label.wps-label{
 }
 #wps-access-table-body tr{
     text-align: center;
+}
+#wps_save_enabled_settings{
+    margin-left: 300px;
 }

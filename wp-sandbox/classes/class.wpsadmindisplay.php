@@ -32,7 +32,7 @@
 			echo '</div>';
 
 			echo '<div id="wps-network-site-status-tab-display">';
-				echo '<h2>Plugin Status (Network View)</h2>';
+				echo '<h3>Plugin Status (Network View)</h3>';
 				echo '<div id="wps-network-enable-alert" class="updated">';
 
 				echo '</div>';
@@ -58,7 +58,7 @@
 					echo '</tbody>';
 				echo '</table>';
 				echo '<br>';
-				echo '<a class="button-primary" onclick="wps_network_enable()">Save Changes</a>';
+				echo '<a class="button-primary" id="wps_save_enabled_settings" onclick="wps_network_enable()">Save Changes</a>';
 			echo '</div>';
 
 			echo '<div id="wps-network-access-tab-display">';
@@ -140,11 +140,6 @@
 				echo '<div class="wps-disable-banner" style="display:none">';
 					echo 'WP Sandbox is currently <strong>DISABLED</strong>. Public users are able to access '.home_url('/');
 				echo '</div>';
-				echo '<script type="text/javascript">';
-					echo 'jQuery(document).ready(function(){';
-						echo 'jQuery("#wp-admin-bar-wps-sandbox-admin-bar-notification").show()';
-					echo '});';
-				echo '</script>';
 			}
 			echo '<div id="wps-settings-saved" class="updated">';
 				echo 'WP Sandbox settings saved';
@@ -246,8 +241,8 @@
 
 				$getAllValidatedUsersQuery = "SELECT * FROM ".$wpdb->prefix."wps_coming_soon WHERE blog_id = '".$currentBlogID."'";
 				$getPreviewHashQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Preview Hash' AND blog_id = '".$currentBlogID."'";
-				$getIPRangesQuery = "SELECT start_ip, end_ip, expires FROM ".$wpdb->prefix."wps_ip_ranges AND blog_id = '".$currentBlogID."'";
-				$getSubnetsQuery = "SELECT start_ip, subnet, expires FROM ".$wpdb->prefix."wps_subnets AND blog_id = '".$currentBlogID."'";
+				$getIPRangesQuery = "SELECT added_by, start_ip, end_ip, expires FROM ".$wpdb->prefix."wps_ip_ranges WHERE blog_id = '".$currentBlogID."'";
+				$getSubnetsQuery = "SELECT added_by, start_ip, subnet, expires FROM ".$wpdb->prefix."wps_subnets WHERE blog_id = '".$currentBlogID."'";
 				$checkDefaultWPSExpireQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Expiration Time' AND blog_id = '".$currentBlogID."'";
 				$checkDefaultEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled' AND blog_id = '".$currentBlogID."'";
 			}else{
@@ -427,20 +422,30 @@
 							echo '</tr>';
 						}
 						foreach($ipRanges as $ipRange){
+							$user = get_userdata( $ipRange['added_by']);
 							echo '<tr>';
 								echo '<td>IP Range</td>';
 								echo '<td>'.$ipRange['start_ip'].' - '.$ipRange['end_ip'].'</td>';
-								echo '<td></td>';
-								echo '<td>'.$ipRange['expires'].'</td>';
+								echo '<td>'.$user->user_login.'</td>';
+								if($ipRange['expires'] == '0000-00-00 00:00:00'){
+									echo '<td>Never</td>';
+								}else{
+									echo '<td>'.$ipRange['expires'].'</td>';
+								}
 								echo '<td><div class="wps-remove" onclick="wps_remove_range(\''.$ipRange['start_ip'].'\', \''.$ipRange['end_ip'].'\')">&times;</div></td>';
 							echo '</tr>';
 						}
 						foreach($subnets as $subnet){
+							$user = get_userdata( $ipRange['added_by']);
 							echo '<tr>';
 								echo '<td>Network</td>';
 								echo '<td>'.$subnet['start_ip'].'/'.$subnet['subnet'].'</td>';
-								echo '<td></td>';
-								echo '<td>'.$subnet['expires'].'</td>';
+								echo '<td>'.$user->user_login.'</td>';
+								if($ipRange['expires'] == '0000-00-00 00:00:00'){
+									echo '<td>Never</td>';
+								}else{
+									echo '<td>'.$subnet['expires'].'</td>';
+								}
 								echo '<td><div class="wps-remove" onclick="wps_remove_subnet(\''.$subnet['start_ip'].'\', \''.$subnet['subnet'].'\')">&times;</div></td>';
 							echo '</tr>';
 						}
