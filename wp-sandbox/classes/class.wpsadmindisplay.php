@@ -253,7 +253,6 @@
 				$checkDefaultWPSExpireQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Expiration Time'";
 				$checkDefaultEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled'";
 			}
-
 			$allValidatedUsers = $wpdb->get_results($getAllValidatedUsersQuery, ARRAY_A);
 			$previewHash = $wpdb->get_results($getPreviewHashQuery, ARRAY_A);
 			$ipRanges = $wpdb->get_results($getIPRangesQuery, ARRAY_A);

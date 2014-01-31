@@ -233,6 +233,7 @@
 
 					$expireTime = '';
 
+					date_default_timezone_set(get_option('timezone_string'));
 					switch($expireTimeOffset[0]['setting_value']){
 						case 'day':
 							$expireTime = date('Y-m-d G:i:s', time() + '86400');
@@ -318,6 +319,7 @@
 				$ipAddress = $_POST['ip'];
 				$expires = $_POST['expires'];
 
+				date_default_timezone_set(get_option('timezone_string'));
 				switch($expires){
 					case 'day':
 						$expireTime = date('Y-m-d G:i:s', time() + '86400');
@@ -751,6 +753,7 @@
 
 			$userID = $current_user->ID;
 
+			date_default_timezone_set(get_option('timezone_string'));
 			switch($expires){
 				case 'day':
 					$expireTime = date('Y-m-d G:i:s', time() + '86400');
@@ -1095,6 +1098,7 @@
 			$expires = $_POST['expiration'];
 			$userID = get_current_user_id();
 
+			date_default_timezone_set(get_option('timezone_string'));
 			switch($expires){
 				case 'day':
 					$expireTime = date('Y-m-d G:i:s', time() + '86400');
