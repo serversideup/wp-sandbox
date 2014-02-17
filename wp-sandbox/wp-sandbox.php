@@ -228,8 +228,7 @@
 					restore_current_blog();
 				}
 
-				if(empty($checkCurrentUser)){
-
+				if(empty($checkCurrentUser) && !$this->wps_check_ip_valid_range($ip) && !$this->wps_check_ip_subnet($ip)){
 					if(is_multisite()){
 						global $switched;
 						$currentBlogID = get_current_blog_id();
@@ -326,49 +325,57 @@
 		*/
 		public function wps_allow_ip(){
 			global $wpdb;
-			if(!$this->wps_check_existing_ip($_POST['ip'])){
-				global $current_user;
-				get_currentuserinfo();
+			if(!$this->wps_check_ip_subnet($_POST['ip'])){
+				if(!$this->wps_check_ip_valid_range($_POST['ip'])){
+					if(!$this->wps_check_existing_ip($_POST['ip'])){
+						global $current_user;
+						get_currentuserinfo();
 
-				$userID = $current_user->ID;
-				$ipAddress = $_POST['ip'];
-				$expires = $_POST['expires'];
+						$userID = $current_user->ID;
+						$ipAddress = $_POST['ip'];
+						$expires = $_POST['expires'];
 
-				date_default_timezone_set(get_option('timezone_string'));
-				switch($expires){
-					case 'day':
-						$expireTime = date('Y-m-d G:i:s', time() + '86400');
-					break;
-					case 'week':
-						$expireTime = date('Y-m-d G:i:s', time() + '604800');
-					break;
-					case 'twoweeks':
-						$expireTime = date('Y-m-d G:i:s', time() + '1209600');
-					break;	
-					case 'month':
-						$expireTime = date('Y-m-d G:i:s', time() + '2592000');
-					break;
-					case 'never':
-						$expireTime = '';
-					break;
-				}
-				if(is_multisite()){
-					global $switched;
-					$currentBlogID = get_current_blog_id();
-					switch_to_blog(1);
+						date_default_timezone_set(get_option('timezone_string'));
+						switch($expires){
+							case 'day':
+								$expireTime = date('Y-m-d G:i:s', time() + '86400');
+							break;
+							case 'week':
+								$expireTime = date('Y-m-d G:i:s', time() + '604800');
+							break;
+							case 'twoweeks':
+								$expireTime = date('Y-m-d G:i:s', time() + '1209600');
+							break;	
+							case 'month':
+								$expireTime = date('Y-m-d G:i:s', time() + '2592000');
+							break;
+							case 'never':
+								$expireTime = '';
+							break;
+						}
+						if(is_multisite()){
+							global $switched;
+							$currentBlogID = get_current_blog_id();
+							switch_to_blog(1);
 
-					$insertValidIPQuery = "INSERT INTO ".$wpdb->prefix."wps_coming_soon (user_id, blog_id, ip, expires) VALUES ('".$userID."', '".$currentBlogID."', '".$ipAddress."', '".$expireTime."')";
+							$insertValidIPQuery = "INSERT INTO ".$wpdb->prefix."wps_coming_soon (user_id, blog_id, ip, expires) VALUES ('".$userID."', '".$currentBlogID."', '".$ipAddress."', '".$expireTime."')";
+						}else{
+							$insertValidIPQuery = "INSERT INTO ".$wpdb->prefix."wps_coming_soon (user_id, ip, expires) VALUES ('".$userID."', '".$ipAddress."', '".$expireTime."')";
+						}
+						$wpdb->query($insertValidIPQuery);
+
+						if(is_multisite()){
+							restore_current_blog();
+						}
+						echo 'true';
+					}else{
+						echo 'false';
+					}
 				}else{
-					$insertValidIPQuery = "INSERT INTO ".$wpdb->prefix."wps_coming_soon (user_id, ip, expires) VALUES ('".$userID."', '".$ipAddress."', '".$expireTime."')";
+					echo 'IP Already in Range';
 				}
-				$wpdb->query($insertValidIPQuery);
-
-				if(is_multisite()){
-					restore_current_blog();
-				}
-				echo 'true';
 			}else{
-				echo 'false';
+				echo 'IP Already in Network';
 			}
 			die();
 		}
@@ -530,15 +537,12 @@
 				$newFourthOctet = '';
 
 				if($subnet['subnet'] <= 8){
-					echo '<font color="red">Start IP: </font>'.$subnet['start_ip'];
 
 					if(($firstOctet + $subnet['subnet']) > 255){
 						$newFirstOctet = 255;
 					}else{
 						$newFirstOctet = $firstOctet + $subnet['subnet'];
 					}
-
-					echo '<font color="red">End IP: </font>'.$newFirstOctet.'.255.255.254';
 
 					$min    = ip2long($subnet['start_ip']);
 	        		$max    = ip2long($newFirstOctet.'.255.255.254');
@@ -548,7 +552,6 @@
 	        			return true;
 	        		}
 				}else if(($subnet['subnet'] > 8) && ($subnet['subnet'] <= 16)){
-					echo '<font color="red">Start IP: </font>'.$subnet['start_ip'];
 
 					if(($secondOctet + $subnet['subnet']) > 255){
 						$newSecondOctet = ($secondOctet + $subnet['subnet']) - 255;
@@ -558,7 +561,6 @@
 						$newSecondOctet = $secondOctet + $subnet['subnet'];
 					}
 
-					echo '<font color="red">End IP: </font>'.$newFirstOctet.'.'.$newSecondOctet.'.255.254';
 
 					$min    = ip2long($subnet['start_ip']);
 	        		$max    = ip2long($newFirstOctet.'.255.255.254');
@@ -568,7 +570,6 @@
 	        			return true;
 	        		}
 				}else if(($subnet['subnet'] > 16) && ($subnet['subnet'] <= 24)){
-					echo '<font color="red">Start IP: </font>'.$subnet['start_ip'];
 
 					if(($thirdOctet + $subnet['subnet']) > 255){
 						$newThirdOctet = ($thirdOctet + $subnet['subnet']) - 255;
@@ -580,7 +581,6 @@
 						$newFirstOctet = $firstOctet;
 					}
 
-					echo '<font color="red">End IP: </font>'.$newFirstOctet.'.'.$newSecondOctet.'.'.$newThirdOctet.'.254';
 
 					$min    = ip2long($subnet['start_ip']);
 	        		$max    = ip2long($newFirstOctet.'.255.255.254');
@@ -590,7 +590,6 @@
 	        			return true;
 	        		}
 				}else if($subnet['subnet'] > 24){
-					echo '<font color="red">Start IP: </font>'.$subnet['start_ip'];
 
 					if(($fourthOctet + $subnet['subnet']) > 255){
 						$newFourthOctet = ($fourthOctet + $subnet['subnet']) - 255;
@@ -604,7 +603,6 @@
 						$newFirstOctet = $firstOctet;
 					}
 
-					echo '<font color="red">End IP: </font>'.$newFirstOctet.'.'.$newSecondOctet.'.'.$newThirdOctet.'.'.$newFourthOctet;
 
 					$min    = ip2long($subnet['start_ip']);
 	        		$max    = ip2long($newFirstOctet.'.255.255.254');

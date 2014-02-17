@@ -250,6 +250,14 @@ function wps_allow_ip(){
 				jQuery('#wps-ip-added-alert').show();
 				jQuery('#wps-ip-added-alert').fadeOut(3000);
 			}
+
+			if(response != 'false' && response != 'true'){
+				jQuery('#wps-ip-added-alert').html(response);
+				jQuery('#wps-ip-added-alert').removeClass('updated');
+				jQuery('#wps-ip-added-alert').addClass('error');
+				jQuery('#wps-ip-added-alert').show();
+				jQuery('#wps-ip-added-alert').fadeOut(3000);
+			}
 		});
 	}else{
 		jQuery('#wps-allowed-ip').css('border', '1px solid red');
