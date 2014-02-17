@@ -78,9 +78,9 @@ ul.wps-toggle li.on a{
     cursor: default;
 }
 div.wps-left{
-	width: 350px;
+	width: 355px;
 	float: left;
-    padding-right: 30px;
+    padding-right: 25px;
 }
 div.wps-right{
 	width: 600px;
