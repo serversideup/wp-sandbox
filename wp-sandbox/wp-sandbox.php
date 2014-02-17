@@ -920,7 +920,7 @@
 
 			$wps_subnet_name = $wpdb->prefix."wps_subnets";
 
-			$wps_subnet_table = 'CREATE TABLE IF NOT EXISTS `'.$wps_subnet_table.'` (
+			$wps_subnet_table = 'CREATE TABLE IF NOT EXISTS `'.$wps_subnet_name.'` (
 			  `added_by` int(11) NOT NULL,
 			  `start_ip` varchar(20) NOT NULL,
 			  `subnet` varchar(2) NOT NULL,
@@ -1298,7 +1298,7 @@
 
 			$wps_subnet_name = $wpdb->prefix."wps_subnets";
 
-			$wps_subnet_table = 'CREATE TABLE IF NOT EXISTS `'.$wps_subnet_table.'` (
+			$wps_subnet_table = 'CREATE TABLE IF NOT EXISTS `'.$wps_subnet_name.'` (
 			  `blog_id` int(11) NOT NULL,
 			  `added_by` int(11) NOT NULL,
 			  `start_ip` varchar(20) NOT NULL,
