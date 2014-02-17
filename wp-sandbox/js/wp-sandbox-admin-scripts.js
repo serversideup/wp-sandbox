@@ -130,35 +130,43 @@ function wps_save_default_page_setting(){
 	Removes a valid user through AJAX
 */
 function wps_remove_user(user_id, ip){
-	var data = {
-		action: 'wps_remove_user',
-		wps_user_id: user_id,
-		wps_ip: ip
+	var wps_remove_user_confirm = confirm("Are you sure you want to remove this user?");
+
+	if(wps_remove_user_confirm == true){
+		var data = {
+			action: 'wps_remove_user',
+			wps_user_id: user_id,
+			wps_ip: ip
+		}
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			data: data,
+			async: false
+		}).done(function(response){
+			wps_reload_access_table();
+		})
 	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		wps_reload_access_table();
-	})
 }
 function wps_network_remove_user(blog_id, user_id, ip){
-	var data = {
-		action: 'wps_network_remove_user',
-		wps_user_id: user_id,
-		wps_ip: ip,
-		wps_blog: blog_id
+	var wps_remove_user_confirm = confirm("Are you sure you want to remove this user?");
+
+	if(wps_remove_user_confirm == true){
+		var data = {
+			action: 'wps_network_remove_user',
+			wps_user_id: user_id,
+			wps_ip: ip,
+			wps_blog: blog_id
+		}
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			data: data,
+			async: false
+		}).done(function(response){
+			wps_reload_network_access_table();
+		})
 	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		wps_reload_network_access_table();
-	})
 }
 function wps_reload_access_table(){
 	var data = {
@@ -387,36 +395,44 @@ function wps_add_ip_range(){
 	Removes an IP Range
 */
 function wps_remove_range(start_ip, end_ip){
-	var data = {
-		action: 'wps_delete_ip_range',
-		start: start_ip,
-		end: end_ip
+	var wps_remove_range_confirm = confirm("Are you sure you want to remove this IP Range?");
+
+	if(wps_remove_range_confirm == true){
+		var data = {
+			action: 'wps_delete_ip_range',
+			start: start_ip,
+			end: end_ip
+		}
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			data: data,
+			async: false
+		}).done(function(response){
+			wps_reload_access_table();
+		});
 	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		wps_reload_access_table();
-	});
 }
 
 function wps_network_remove_range(blog, start_ip, end_ip){
-	var data = {
-		action: 'wps_network_delete_ip_range',
-		start: start_ip,
-		end: end_ip,
-		blog_id: blog
+	var wps_remove_range_confirm = confirm("Are you sure you want to remove this IP Range?");
+
+	if(wps_remove_range_confirm == true){
+		var data = {
+			action: 'wps_network_delete_ip_range',
+			start: start_ip,
+			end: end_ip,
+			blog_id: blog
+		}
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			data: data,
+			async: false
+		}).done(function(response){
+			wps_reload_network_access_table();
+		});
 	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		wps_reload_network_access_table();
-	});
 }
 
 /*
@@ -466,33 +482,41 @@ function wps_add_network(){
 	Removes a Subnet
 */
 function wps_remove_subnet(ip, subnet){
-	var data = {
-		action: 'wps_remove_subnet',
-		start_ip: ip,
-		subnet_extension: subnet
+	var wps_remove_subnet_confirm = confirm("Are you sure you want to remove this network?");
+
+	if(wps_remove_subnet_confirm == true){
+		var data = {
+			action: 'wps_remove_subnet',
+			start_ip: ip,
+			subnet_extension: subnet
+		}
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			data: data,
+			async: false
+		}).done(function(response){
+			wps_reload_access_table();
+		});
 	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		wps_reload_access_table();
-	});
 }
 function wps_network_remove_subnet(blog, ip, subnet){
-	var data = {
-		action: 'wps_network_remove_subnet',
-		start_ip: ip,
-		subnet_extension: subnet,
-		blog_id: blog
+	var wps_remove_subnet_confirm = confirm("Are you sure you want to remove this network?");
+
+	if(wps_remove_subnet_confirm == true){
+		var data = {
+			action: 'wps_network_remove_subnet',
+			start_ip: ip,
+			subnet_extension: subnet,
+			blog_id: blog
+		}
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			data: data,
+			async: false
+		}).done(function(response){
+			wps_reload_network_access_table();
+		});
 	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		wps_reload_network_access_table();
-	});
 }

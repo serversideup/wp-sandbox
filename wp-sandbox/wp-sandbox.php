@@ -25,6 +25,11 @@
 			add_action('admin_init', array($this, 'wps_enqueue_admin_scripts'));
 
 			/*
+				Front end styles for the admin bar
+			*/
+			add_action('init', array($this, 'wps_enqueue_styles'));
+
+			/*
 				Configures the admin menu for the plugin
 			*/
 			add_action('admin_menu', array($this, 'wps_plugin_settings'));
@@ -147,6 +152,12 @@
 			wp_enqueue_style('wps-admin-styles', plugins_url().'/wp-sandbox/css/wp-sandbox-admin-styles.css');
 		}
 
+		/*
+			Sets up styles for the front end (admin bar only).
+		*/
+		public function wps_enqueue_styles(){
+			wp_enqueue_style('wps-styles', plugins_url().'/wp-sandbox/css/wp-sandbox-styles.css');
+		}
 		//-------------------------------------------------------//
 		/* ADMIN MENU SET UP */
 		
