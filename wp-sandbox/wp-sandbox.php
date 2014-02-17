@@ -40,6 +40,10 @@
 			add_action('network_admin_menu', array($this, 'wps_network_plugin_settings'));
 
 			/*
+				Sets default settings for the new site creation
+			*/
+			add_action('wpmu_new_blog', array($this, 'wps_new_site_default_settings'));
+			/*
 				Saves the admin user's IP if it's not already in the database
 			*/
 			add_action('admin_init', array($this, 'wps_save_valid_login'));
@@ -1382,6 +1386,29 @@
 				}
 			}
 		}
+
+		public function wps_new_site_default_settings(){
+			global $wpdb;
+
+			$getNewestBlogQuery = "SELECT blog_id FROM ".$wpdb->prefix."blogs ORDER BY blog_id DESC";
+			$newestBlog = $wpdb->get_results($getNewestBlogQuery, ARRAY_A);
+
+			$blog_id = $newestBlog[0]['blog_id'];
+			
+			$addDefaultPageSettingOption = "INSERT INTO ".$wpdb->prefix."wps_coming_soon_settings (blog_id, setting_name) VALUES ('".$blog_id."', 'Default Page')";
+			$wpdb->query($addDefaultPageSettingOption);
+
+			$addDefaultExpireOption = "INSERT INTO ".$wpdb->prefix."wps_coming_soon_settings (blog_id, setting_name, setting_value) VALUES ('".$blog_id."', 'Default Expiration Time', 'never')";
+			$wpdb->query($addDefaultExpireOption);
+
+			$hash = $this->wps_generate_preview_hash();
+			$addDefaultHash = "INSERT INTO ".$wpdb->prefix."wps_coming_soon_settings (blog_id, setting_name, setting_value) VALUES ('".$blog_id."', 'Preview Hash', '".$hash."')";
+			$wpdb->query($addDefaultHash);
+
+			$addDefaultEnabled = "INSERT INTO ".$wpdb->prefix."wps_coming_soon_settings (blog_id, setting_name, setting_value) VALUES ('".$blog_id."', 'Enabled', '0')";
+			$wpdb->query($addDefaultEnabled);
+		}
+
 		public function wps_network_enable_blogs(){
 			global $wpdb;
 			$wps_enable_sites = $_POST['enabled_sites'];
