@@ -68,38 +68,57 @@
 							echo '<th>Site Name</th>';
 							echo '<th>Type</th>';
 							echo '<th>Network/IPs</th>';
+							echo '<th>Added By</th>';
 							echo '<th>Expires</th>';
 							echo '<th></th>';
 						echo '</tr>';
 					echo '</thead>';
 					echo '<tbody id="wps-network-global-access-table-body">';
 						foreach($allValidatedUsers as $validatedUser){
+							$user = get_userdata( $validatedUser['user_id']);
 							$blogInfo = get_blog_details($validatedUser['blog_id']);
 							echo '<tr>';
 								echo '<td>http://'.$blogInfo->domain.'</td>';
 								echo '<td>Single</td>';
 								echo '<td>'.$validatedUser['ip'].'</td>';
-								echo '<td>'.$validatedUser['expires'].'</td>';
+								echo '<td>'.$user->user_login.'</td>';
+								if($validatedUser['expires'] == '0000-00-00 00:00:00'){
+									echo '<td>Never</td>';
+								}else{
+									echo '<td>'.$validatedUser['expires'].'</td>';
+								}
 								echo '<td><div class="wps-remove" onclick="wps_network_remove_user(\''.$validatedUser['blog_id'].'\', \''.$validatedUser['user_id'].'\', \''.$validatedUser['ip'].'\')">&times;</div></td>';
 							echo '</tr>';
 						}
 						foreach($ipRanges as $ipRange){
+							$user = get_userdata( $ipRange['added_by']);
 							$blogInfo = get_blog_details($ipRange['blog_id']);
 							echo '<tr>';
 								echo '<td>http://'.$blogInfo->domain.'</td>';
 								echo '<td>Range</td>';
 								echo '<td>'.$ipRange['start_ip'].' - '.$ipRange['end_ip'].'</td>';
-								echo '<td>'.$ipRange['expires'].'</td>';
+								echo '<td>'.$user->user_login.'</td>';
+								if($ipRange['expires'] == '0000-00-00 00:00:00'){
+									echo '<td>Never</td>';
+								}else{
+									echo '<td>'.$ipRange['expires'].'</td>';
+								}
 								echo '<td><div class="wps-remove" onclick="wps_network_remove_range(\''.$ipRange['blog_id'].'\', \''.$ipRange['start_ip'].'\', \''.$ipRange['end_ip'].'\')">&times;</div></td>';
 							echo '</tr>';
 						}
 						foreach($subnets as $subnet){
+							$user = get_userdata($subnet['added_by']);
 							$blogInfo = get_blog_details($subnet['blog_id']);
 							echo '<tr>';
 								echo '<td>http://'.$blogInfo->domain.'</td>';
 								echo '<td>Network</td>';
 								echo '<td>'.$subnet['start_ip'].'/'.$subnet['subnet'].'</td>';
-								echo '<td>'.$subnet['expires'].'</td>';
+								echo '<td>'.$user->user_login.'</td>';
+								if($subnet['expires'] == '0000-00-00 00:00:00'){
+									echo '<td>Never</td>';
+								}else{
+									echo '<td>'.$subnet['expires'].'</td>';
+								}
 								echo '<td><div class="wps-remove" onclick="wps_network_remove_subnet(\''.$subnet['blog_id'].'\', \''.$subnet['start_ip'].'\', \''.$subnet['subnet'].'\')">&times;</div></td>';
 							echo '</tr>';
 						}
