@@ -391,7 +391,7 @@
 				echo '<a class="button button-primary" onclick="wps_add_ip_range()"/>Add IP Range</a>';
 
 				echo '<h3>Add Network</h3>';
-				echo '<label class="wps-label">Network: </label><input id="wps-subnet-network" name="wps-subnet-network" /> / <input id="wps-subnet-network-subnet" name="wps-subnet-network-subnet" size="2"/><br>';
+				echo '<label class="wps-label">Network: </label><input id="wps-subnet-network" name="wps-subnet-network" size="13"/> / <input id="wps-subnet-network-subnet" name="wps-subnet-network-subnet" size="2"/><br>';
 				echo '<label class="wps-label">Expiration: </label>';
 				echo '<select id="wps-add-network-expiration">';
 					if($checkDefaultWPSExpire[0]['setting_value'] == 'day'){
