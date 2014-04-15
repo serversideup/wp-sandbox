@@ -105,10 +105,19 @@
 				global $wp_admin_bar;
 				$wp_admin_bar->add_menu( array(
 					'parent' => false, 
-					'id' => 'wps-sandbox-admin-bar-notification', 
+					'id' => 'wps-sandbox-admin-bar-notification',
 					'title' => __('WP Sandbox Enabled'),
 					'href' => admin_url( 'admin.php?page=wps_sandbox'),
-					'meta' => array('class' => 'wps-admin-menu-notification ab-top-secondary')
+					'meta' => array('class' => 'ab-top-secondary wps-admin-bar-enabled')
+				));
+			}else{
+				global $wp_admin_bar;
+				$wp_admin_bar->add_menu( array(
+					'parent' => false, 
+					'id' => 'wps-sandbox-admin-bar-notification',
+					'title' => __('WP Sandbox Disabled'),
+					'href' => admin_url( 'admin.php?page=wps_sandbox'),
+					'meta' => array('class' => 'ab-top-secondary wps-admin-bar-disabled')
 				));
 			}
 		}

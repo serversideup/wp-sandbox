@@ -97,7 +97,7 @@ label.wps-label{
     padding-bottom: 10px;
     display: none;
 }
-#wp-admin-bar-wps-sandbox-admin-bar-notification{
+.wps-admin-bar-disabled{
     background: #ff4343 !important; /* Old browsers */ 
     background: -moz-linear-gradient(top,  #ff4343 0%, #ef2424 50%, #e20a0a 100%) !important; /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ff4343), color-stop(50%,#ef2424), color-stop(100%,#e20a0a)) !important; /* Chrome,Safari4+ */
@@ -106,6 +106,16 @@ label.wps-label{
     background: -ms-linear-gradient(top,  #ff4343 0%,#ef2424 50%,#e20a0a 100%) !important; /* IE10+ */
     background: linear-gradient(to bottom,  #ff4343 0%,#ef2424 50%,#e20a0a 100%) !important; /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff4343', endColorstr='#e20a0a',GradientType=0 ) !important; /* IE6-9 */
+}
+.wps-admin-bar-enabled{
+    background: #28cc33 !important; /* Old browsers */ 
+    background: -moz-linear-gradient(top,  #28cc33 0%, #23bc56 50%, #2ab73a 100%) !important; /* FF3.6+ */
+    background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#28cc33), color-stop(50%,#23bc56), color-stop(100%,#2ab73a)) !important; /* Chrome,Safari4+ */
+    background: -webkit-linear-gradient(top,  #28cc33 0%,#23bc56 50%,#2ab73a 100%) !important; /* Chrome10+,Safari5.1+ */
+    background: -o-linear-gradient(top,  #28cc33 0%,#23bc56 50%,#2ab73a 100%) !important; /* Opera 11.10+ */
+    background: -ms-linear-gradient(top,  #28cc33 0%,#23bc56 50%,#2ab73a 100%) !important; /* IE10+ */
+    background: linear-gradient(to bottom,  #28cc33 0%,#23bc56 50%,#2ab73a 100%) !important; /* W3C */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#28cc33', endColorstr='#2ab73a',GradientType=0 )  !important; /* IE6-9 */
 }
 #wps-ip-added-alert{
     font-size: 15px;

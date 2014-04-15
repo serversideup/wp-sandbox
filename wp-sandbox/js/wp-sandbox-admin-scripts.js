@@ -18,7 +18,10 @@ jQuery(function(){
 				async: false
 			}).done(function(response){
 				jQuery('.wps-disable-banner').hide();
-				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').show();
+				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').removeClass('wps-admin-bar-disabled');
+				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').addClass('wps-admin-bar-enabled');
+				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification .ab-item').html('WP Sandbox Enabled');
+
 			});
         }else{
         	var data = {
@@ -32,7 +35,9 @@ jQuery(function(){
 				async: false
 			}).done(function(response){
 				jQuery('.wps-disable-banner').show();
-				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').hide();
+				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').removeClass('wps-admin-bar-enabled');
+				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').addClass('wps-admin-bar-disabled');
+				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification .ab-item').html('WP Sandbox Disabled');
 			});
         }
     });
