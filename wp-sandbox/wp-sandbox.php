@@ -66,6 +66,7 @@
 			add_action('wp_ajax_wps_allow_ip', array($this, 'wps_allow_ip'));
 			add_action('wp_ajax_wps_generate_preview_hash_url', array($this, 'wps_generate_preview_hash_url'));
 			add_action('wp_ajax_wps_enable_plugin', array($this, 'wps_enable_plugin'));
+			add_action('wp_ajax_wps_enable_cloud_flare', array($this, 'wps_enable_cloud_flare'));
 			add_action('wp_ajax_wps_save_ip_ranges', array($this, 'wps_save_ip_ranges'));
 			add_action('wp_ajax_wps_delete_ip_range', array($this, 'wps_delete_ip_range'));
 			add_action('wp_ajax_wps_network_delete_ip_range', array($this, 'wps_network_delete_ip_range'));
@@ -210,7 +211,15 @@
 				get_currentuserinfo();
 
 				$userID = $current_user->ID;
-				$ipAddress = $_SERVER['REMOTE_ADDR'];
+				
+				$checkCloudFlareEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'CloudFlare'";
+				$checkCloudFlareEnabled = $wpdb->get_results($checkCloudFlareEnabledQuery, ARRAY_A);
+
+				if($checkCloudFlareEnabled[0]['setting_value'] == '1'){
+					$ipAddress = $_SERVER['HTTP_CF_CONNECTING_IP'];
+				}else{
+					$ipAddress = $_SERVER['REMOTE_ADDR'];
+				}
 				
 				if(is_multisite()){
 					global $switched;
@@ -394,7 +403,15 @@
 				if(!$this->wps_check_if_log_in_page()){
 					//Checks if plugin is enabled
 					if($this->wps_check_plugin_enabled()){
-						$ip = $_SERVER['REMOTE_ADDR'];
+						$checkCloudFlareEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'CloudFlare'";
+						$checkCloudFlareEnabled = $wpdb->get_results($checkCloudFlareEnabledQuery, ARRAY_A);
+
+						if($checkCloudFlareEnabled[0]['setting_value'] == '1'){
+							$ip = $_SERVER['HTTP_CF_CONNECTING_IP'];
+						}else{
+							$ip = $_SERVER['REMOTE_ADDR'];
+						}
+						
 
 						if($this->wps_check_valid_ip($ip)){
 							return true;
@@ -983,6 +1000,14 @@
 				$addDefaultEnabled = "INSERT INTO ".$wpdb->prefix."wps_coming_soon_settings (setting_name, setting_value) VALUES ('Enabled', '0')";
 				$wpdb->query($addDefaultEnabled);
 			}
+
+			$checkCloudFlareEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'CloudFlare'";
+			$checkCloudFlareEnabled = $wpdb->get_results($checkCloudFlareEnabledQuery, ARRAY_A);
+
+			if(empty($checkCloudFlareEnabled)){
+				$addCloudFlareEnabled = "INSERT INTO ".$wpdb->prefix."wps_coming_soon_settings (setting_name, setting_value) VALUES ('CloudFlare', '0')";
+				$wpdb->query($addCloudFlareEnabled);
+			}
 		}
 
 		/*
@@ -1064,7 +1089,7 @@
 			}else{
 				$enablePluginQuery = "UPDATE ".$wpdb->prefix."wps_coming_soon_settings SET setting_value = '".$enabled."' WHERE setting_name = 'Enabled'";
 			}
-			echo $enablePluginQuery;
+
 			$wpdb->query($enablePluginQuery);
 
 			if(is_multisite()){
@@ -1072,6 +1097,32 @@
 			}
 			die();
 
+		}
+
+		/*
+			Enables Cloud Flare support
+		*/
+		public function wps_enable_cloud_flare(){
+			global $wpdb;
+
+			$enabled = $_POST['cloud_flare_enabled'];
+
+			if(is_multisite()){
+				global $switched;
+				$currentBlogID = get_current_blog_id();
+				switch_to_blog(1);
+
+				$enableCloudFlareQuery = "UPDATE ".$wpdb->prefix."wps_coming_soon_settings SET setting_value = '".$enabled."' WHERE setting_name = 'CloudFlare' AND blog_id = '".$currentBlogID."'";
+			}else{
+				$enableCloudFlareQuery = "UPDATE ".$wpdb->prefix."wps_coming_soon_settings SET setting_value = '".$enabled."' WHERE setting_name = 'CloudFlare'";
+			}
+
+			$wpdb->query($enableCloudFlareQuery);
+
+			if(is_multisite()){
+				restore_current_blog();
+			}
+			die();
 		}
 
 		/*
@@ -1381,6 +1432,14 @@
 				if(empty($checkEnabled)){
 					$addDefaultEnabled = "INSERT INTO ".$wpdb->prefix."wps_coming_soon_settings (blog_id, setting_name, setting_value) VALUES ('".$blog_id."', 'Enabled', '0')";
 					$wpdb->query($addDefaultEnabled);
+				}
+
+				$checkCloudFlareEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'CloudFlare' AND blog_id = '".$blog_id."'";
+				$checkCloudFlareEnabled = $wpdb->get_results($checkCloudFlareEnabledQuery, ARRAY_A);
+
+				if(empty($checkCloudFlareEnabled)){
+					$addCloudFlareEnabled = "INSERT INTO ".$wpdb->prefix."wps_coming_soon_settings (blog_id, setting_name, setting_value) VALUES ('".$blog_id."', 'Enabled', '0')";
+					$wpdb->query($addCloudFlareEnabled);
 				}
 			}
 		}

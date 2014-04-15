@@ -2,8 +2,8 @@
 	Enables and disables the plugin
 */
 jQuery(function(){
-    jQuery("ul.wps-toggle li").click(function(){
-        jQuery("ul.wps-toggle li").removeClass("on");
+    jQuery("ul#wps-enable-disable-switch li").click(function(){
+        jQuery("ul#wps-enable-disable-switch li").removeClass("on");
         jQuery(this).addClass("on"); 
 
         if(jQuery(this).attr('data-setting') == 'on'){
@@ -36,6 +36,44 @@ jQuery(function(){
 			});
         }
     });
+});
+
+/*
+	Enables and disables CloudFlare
+*/
+jQuery(function(){
+	jQuery("ul#wps-cloud-flare-enable-disable-switch li").click(function(){
+		jQuery("ul#wps-cloud-flare-enable-disable-switch li").removeClass("on");
+		jQuery(this).addClass("on");
+
+		if(jQuery(this).attr('data-setting') == 'on'){
+			var data = {
+				action: 'wps_enable_cloud_flare',
+				cloud_flare_enabled: '1'
+			}
+			jQuery.ajax({
+				type: 'POST',
+				url: ajaxurl,
+				data: data,
+				async: false
+			}).done(function(response){
+
+			});
+		}else{
+			var data = {
+				action: 'wps_enable_cloud_flare',
+				cloud_flare_enabled: '0'
+			}
+			jQuery.ajax({
+				type: 'POST',
+				url: ajaxurl,
+				data: data,
+				async: false
+			}).done(function(response){
+
+			});
+		}
+	});
 });
 
 jQuery(document).ready(function(){

@@ -137,15 +137,18 @@
 				$checkDefaultWPSPageQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Page' AND blog_id = '".$currentBlogID."'";
 				$checkDefaultWPSExpireQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Expiration Time' AND blog_id = '".$currentBlogID."'";
 				$checkDefaultEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled' AND blog_id = '".$currentBlogID."'";
+				$checkCloudFlareEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'CloudFlare' AND blog_id = '".$currentBlogID."'";
 			}else{
 				$checkDefaultWPSPageQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Page'";
 				$checkDefaultWPSExpireQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Default Expiration Time'";
 				$checkDefaultEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'Enabled'";
+				$checkCloudFlareEnabledQuery = "SELECT setting_value FROM ".$wpdb->prefix."wps_coming_soon_settings WHERE setting_name = 'CloudFlare'";
 			}
 
 			$checkDefaultWPSExpire = $wpdb->get_results($checkDefaultWPSExpireQuery, ARRAY_A);
 			$checkDefaultWPSPage = $wpdb->get_results($checkDefaultWPSPageQuery, ARRAY_A);
 			$checkDefaultEnabled = $wpdb->get_results($checkDefaultEnabledQuery, ARRAY_A);
+			$checkCloudFlare = $wpdb->get_results($checkCloudFlareEnabledQuery, ARRAY_A);
 
 			if(is_multisite()){
 				restore_current_blog();
@@ -167,13 +170,26 @@
 
 			echo '<div class="wps-display-row">';
 				echo '<div class="wps-display-label">Limit public access to website: </div>';
-				echo '<ul class="wps-toggle">';
+				echo '<ul class="wps-toggle" id="wps-enable-disable-switch">';
 					if($checkDefaultEnabled[0]['setting_value'] == '0'){
 						echo '<li class="on" data-setting="off"><a href="#">OFF</a></li>';
     					echo '<li data-setting="on"><a href="#">ON</a></li>';
 					}else{
 						echo '<li data-setting="off"><a href="#">OFF</a></li>';
     					echo '<li class="on" data-setting="on"><a href="#">ON</a></li>';
+					}
+				echo '</ul>';
+			echo '</div>';
+
+			echo '<div class="wps-display-row">';
+				echo '<div class="wps-display-label">CloudFlare Enabled: </div>';
+				echo '<ul class="wps-toggle" id="wps-cloud-flare-enable-disable-switch">';
+					if($checkCloudFlare[0]['setting_value'] == '0'){
+						echo '<li class="on" data-setting="off"><a href="#">OFF</a></li>';
+						echo '<li data-setting="on"><a href="#">ON</a></li>';
+					}else{
+						echo '<li data-setting="off"><a href="#">OFF</a></li>';
+						echo '<li class="on" data-setting="on"><a href="#">ON</a></li>';
 					}
 				echo '</ul>';
 			echo '</div>';
