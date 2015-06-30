@@ -1,0 +1,6 @@
+#Ignore all except WP Sandbox items
+*
+!.gitignore
+!/wp-sandbox
+!README.md
+!LICENSE
