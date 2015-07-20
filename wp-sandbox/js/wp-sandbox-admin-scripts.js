@@ -1,357 +1,177 @@
-/*
-	Enables and disables the plugin
-*/
+/*------------------------------------------------
+	CLICK HANDLER
+	Handles the validations of adding an access 
+	rule.  If the rule is validated, then
+	we send it to the server using the
+	wpsAddAccessRule( type, rule ) function.
+------------------------------------------------*/
 jQuery(function(){
-    jQuery("ul#wps-enable-disable-switch li").click(function(){
-        jQuery("ul#wps-enable-disable-switch li").removeClass("on");
-        jQuery(this).addClass("on"); 
+	jQuery('#wps-add-access-rule').click(function(){
+		var type = '';
+		var valid = false;
+		
+		/*
+			Removes spaces from the subject.
+		*/
+		var accessSubject = jQuery('#wps-access-rule').val().replace(/\s/g, '');
 
-        if(jQuery(this).attr('data-setting') == 'on'){
-			var data = {
-				action: 'wps_enable_plugin',
-				enabled: '1'
-			}
-			jQuery.ajax({
-				type: 'POST',
-				url: ajaxurl,
-				data: data,
-				async: false
-			}).done(function(response){
-				jQuery('.wps-disable-banner').hide();
-				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').removeClass('wps-admin-bar-disabled');
-				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').addClass('wps-admin-bar-enabled');
-				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification .ab-item').html('WP Sandbox Enabled');
 
-			});
-        }else{
-        	var data = {
-				action: 'wps_enable_plugin',
-				enabled: '0'
+		/*
+			Validates a single IP
+		*/
+		if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test( accessSubject ) ) {  
+			type = 'single';
+			valid = true;
+		}
+
+		/*
+			Validates an IP Range
+		*/
+		else if (/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\-(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test( accessSubject ) ) {  
+			/*
+				Checks to see if the range is valid meaning
+				that the first IP is lower than the second IP.
+			*/
+			if( wpsCheckValidRange( accessSubject ) ){
+				type = 'range';
+				valid = true;
 			}
-			jQuery.ajax({
-				type: 'POST',
-				url: ajaxurl,
-				data: data,
-				async: false
-			}).done(function(response){
-				jQuery('.wps-disable-banner').show();
-				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').removeClass('wps-admin-bar-enabled');
-				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').addClass('wps-admin-bar-disabled');
-				jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification .ab-item').html('WP Sandbox Disabled');
-			});
-        }
-    });
+		}
+
+		/*
+			Validates a Network
+		*/
+		else if (/^(1\d{0,2}|2(?:[0-4]\d{0,1}|[6789]|5[0-5]?)?|[3-9]\d?|0)\.(1\d{0,2}|2(?:[0-4]\d{0,1}|[6789]|5[0-5]?)?|[3-9]\d?|0)\.(1\d{0,2}|2(?:[0-4]\d{0,1}|[6789]|5[0-5]?)?|[3-9]\d?|0)\.(1\d{0,2}|2(?:[0-4]\d{0,1}|[6789]|5[0-5]?)?|[3-9]\d?|0)(\/(?:[012]\d?|3[012]?|[0-9]?)){0,1}$/.test( accessSubject ) ) {
+			type = 'subnet';
+			valid = true;
+		}
+
+		/*
+			If everything validates we send the 
+			type and the rule to the server.
+			Otherwise we display an error message
+			to the user.
+		*/
+		if( valid ){
+			var expiration = jQuery('#wps-expiration').val();
+
+			wpsAddAccessRule( type, accessSubject, expiration );
+
+			/*
+				Reset styles
+			*/
+			jQuery('#wps-access-rule').css('border', '1px solid #ddd');
+			jQuery('#wps-access-rule-validation').hide();
+		}else{
+			jQuery('#wps-access-rule').css('border', '1px solid red');
+			jQuery('#wps-access-rule-validation').show();
+		}
+
+	});
 });
 
-/*
-	Enables and disables CloudFlare
-*/
+/*------------------------------------------------
+	CLICK HANDLER
+	Handles the deletion of an access rule
+------------------------------------------------*/
 jQuery(function(){
-	jQuery("ul#wps-cloud-flare-enable-disable-switch li").click(function(){
-		jQuery("ul#wps-cloud-flare-enable-disable-switch li").removeClass("on");
-		jQuery(this).addClass("on");
+	jQuery('.wps-remove-access').click(function(){
+		var ruleID = jQuery(this).attr('data-attr-id');
+		var type = jQuery(this).attr('data-attr-type');
 
-		if(jQuery(this).attr('data-setting') == 'on'){
-			var data = {
-				action: 'wps_enable_cloud_flare',
-				cloud_flare_enabled: '1'
-			}
-			jQuery.ajax({
-				type: 'POST',
-				url: ajaxurl,
-				data: data,
-				async: false
-			}).done(function(response){
-
-			});
-		}else{
-			var data = {
-				action: 'wps_enable_cloud_flare',
-				cloud_flare_enabled: '0'
-			}
-			jQuery.ajax({
-				type: 'POST',
-				url: ajaxurl,
-				data: data,
-				async: false
-			}).done(function(response){
-
-			});
-		}
+		wpsRemoveAccessRule( ruleID, type );
 	});
 });
 
-jQuery(document).ready(function(){
-	jQuery('#wps-network-enable-all-checkboxes').click(function(){
-		if(jQuery('#wps-network-enable-all-checkboxes').is(':checked')){
-			jQuery('input[type=checkbox]').prop('checked', 'checked');
-		}else{
-			jQuery('input[type=checkbox]').prop('checked', '');
-		}
+/*------------------------------------------------
+	CLICK HANDLER
+	Regenerates the preview url
+------------------------------------------------*/
+jQuery(function(){
+	jQuery('#wps-regenerate-url').click(function(){
+		wpsRegenerateURL();
+	});
+})
+
+/*------------------------------------------------
+	CLICK HANDLER
+	Saves the settings from the settings page
+------------------------------------------------*/
+jQuery(function(){
+	jQuery('#wps-save-settings').click(function(){
+		wpsSaveSettings();
 	});
 });
 
-function wps_network_enable(){
-	var wps_enable_blogs = []
-	jQuery('input[name=wps-network-enable-blog').each(function() {
-		if(jQuery(this).is(':checked')){
-      		wps_enable_blogs.push(jQuery(this).attr('data-attr-blog-id'));
-      	}
-    });
-    
-    var data = {
-    	action: 'wps_network_enable_blogs',
-    	enabled_sites: wps_enable_blogs
-    }
-
-    jQuery.ajax({
-    	type: 'POST',
-    	url: ajaxurl,
-    	data: data,
-    	async: false
-    }).done(function(response){
-    	jQuery('#wps-network-enable-alert').html('Sites Enabled!');
-    	jQuery('#wps-network-enable-alert').show();
-    	jQuery('#wps-network-enable-alert').fadeOut(3000);
-    });
-}
-function wps_network_display_site_status_tab(){
-	jQuery('#wps-network-site-status-tab').removeClass('wps-network-admin-tab-inactive');
-	jQuery('#wps-network-network-access-tab').addClass('wps-network-admin-tab-inactive');
-
-	jQuery('#wps-network-site-status-tab-display').show();
-	jQuery('#wps-network-access-tab-display').hide();
-}
-function wps_network_display_network_access_tab(){
-	jQuery('#wps-network-site-status-tab').addClass('wps-network-admin-tab-inactive');
-	jQuery('#wps-network-network-access-tab').removeClass('wps-network-admin-tab-inactive');
-
-	jQuery('#wps-network-site-status-tab-display').hide();
-	jQuery('#wps-network-access-tab-display').show();
-}
-function wps_save_settings(){
-	var data = {
-		action: 'wps_save_admin_settings',
-		default_page: jQuery('#wps-default-page').val(),
-		default_expire_time: jQuery('#wps-default-expire-time').val()
-	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		if(response == 'true'){
-			jQuery('#wps-settings-saved').show();
-		}
+/*------------------------------------------------
+	CLICK HANDLER
+	Handles the change of the toggle
+	enable/disable checkbox
+------------------------------------------------*/
+jQuery(function(){
+	jQuery('#wps-toggle-select-deselect-all').click(function(){
+		wpsSelectDeselectAllBlogs( jQuery(this).is(':checked') );
 	});
-}
-/* 
-	Saves the default page settings through AJAX
-*/
-function wps_save_default_page_setting(){
-	var data = {
-		action: 'wps_save_admin_settings',
-		default_page: jQuery('#wps-default-page').val(),
-		setting: 'default_page'
-	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
+});
 
-	}).done(function(response){
-		if(response == 'true'){
-			jQuery('#wps-settings-saved').show();
-			jQuery('#wps-settings-saved').fadeOut(3000);
-			wps_reload_access_table();
-		}
+/*------------------------------------------------
+	CLICK HANDLER
+	Submits enable and disabled sites
+------------------------------------------------*/
+jQuery(function(){
+	jQuery('#wps-network-enable-sites-save').click(function(){
+		wpsSubmitEnabledDisabledChanges();
 	});
-}
-/*
-	Removes a valid user through AJAX
-*/
-function wps_remove_user(user_id, ip){
-	var wps_remove_user_confirm = confirm("Are you sure you want to remove this user?");
+});
 
-	if(wps_remove_user_confirm == true){
-		var data = {
-			action: 'wps_remove_user',
-			wps_user_id: user_id,
-			wps_ip: ip
-		}
-		jQuery.ajax({
-			type: 'POST',
-			url: ajaxurl,
-			data: data,
-			async: false
-		}).done(function(response){
-			wps_reload_access_table();
-		})
-	}
-}
-function wps_network_remove_user(blog_id, user_id, ip){
-	var wps_remove_user_confirm = confirm("Are you sure you want to remove this user?");
+/*------------------------------------------------
+	Checks to see if the IP range is valid
+	meaning that the first IP is less than 
+	the second IP.
+------------------------------------------------*/
+function wpsCheckValidRange( ipRange ){
+	var ipParts = ipRange.split('-');
 
-	if(wps_remove_user_confirm == true){
-		var data = {
-			action: 'wps_network_remove_user',
-			wps_user_id: user_id,
-			wps_ip: ip,
-			wps_blog: blog_id
-		}
-		jQuery.ajax({
-			type: 'POST',
-			url: ajaxurl,
-			data: data,
-			async: false
-		}).done(function(response){
-			wps_reload_network_access_table();
-		})
-	}
-}
-function wps_reload_access_table(){
-	var data = {
-		action: 'wps_reload_access_table'
-	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		jQuery('#wps-access-table-body').html(response);
-	});
-}
-function wps_reload_network_access_table(){
-	var data = {
-		action: 'wps_reload_network_access_table'
-	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		jQuery('#wps-network-global-access-table-body').html(response);
-	});
-}
-
-/*
-	Saves the default expiration time for users
-*/
-function wps_save_default_expire_time(){
-	var data = {
-		action: 'wps_save_admin_settings',
-		default_expire_time: jQuery('#wps-default-expire-time').val(),
-		setting: 'default_expire_time'
-	}
-	jQuery.ajax({
-		type: 'POST',
-		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		if(response == 'true'){
-			jQuery('#wps-settings-saved').show();
-			jQuery('#wps-settings-saved').fadeOut(3000);
-			wps_reload_access_table();
-		}
-	})
-}
-
-/*
-	Allows a static IP
-*/
-function wps_allow_ip(){
-	if(wps_check_valid_ip(jQuery('#wps-allowed-ip').val())) {
-		jQuery('#wps-allowed-ip').css('border', '1px solid green');
-		var data = {
-			action: 'wps_allow_ip',
-			ip: jQuery('#wps-allowed-ip').val(),
-			expires: jQuery('#wps-add-ip-address-expiration').val()
-		}
-		jQuery.ajax({
-			type: 'POST',
-			url: ajaxurl,
-			data: data,
-			async: false
-		}).done(function(response){
-			if(response == 'true'){
-				jQuery('#wps-ip-added-alert').html('IP Address Added');
-				jQuery('#wps-ip-added-alert').removeClass('error');
-				jQuery('#wps-ip-added-alert').addClass('updated');
-				jQuery('#wps-ip-added-alert').show();
-				jQuery('#wps-ip-added-alert').fadeOut(3000);
-				wps_reload_access_table();
-			}
-			if(response == 'false'){
-				jQuery('#wps-ip-added-alert').html('IP Already Exists');
-				jQuery('#wps-ip-added-alert').removeClass('updated');
-				jQuery('#wps-ip-added-alert').addClass('error');
-				jQuery('#wps-ip-added-alert').show();
-				jQuery('#wps-ip-added-alert').fadeOut(3000);
-			}
-
-			if(response != 'false' && response != 'true'){
-				jQuery('#wps-ip-added-alert').html(response);
-				jQuery('#wps-ip-added-alert').removeClass('updated');
-				jQuery('#wps-ip-added-alert').addClass('error');
-				jQuery('#wps-ip-added-alert').show();
-				jQuery('#wps-ip-added-alert').fadeOut(3000);
-			}
-		});
-	}else{
-		jQuery('#wps-allowed-ip').css('border', '1px solid red');
-		jQuery('#wps-ip-added-alert').html('IP Invalid');
-		jQuery('#wps-ip-added-alert').removeClass('updated');
-		jQuery('#wps-ip-added-alert').addClass('error');
-		jQuery('#wps-ip-added-alert').show();
-		jQuery('#wps-ip-added-alert').fadeOut(3000);
-	}
-}
-
-function wps_check_valid_ip(ip_address){
-	var ip_parts = ip_address.split('.');
-	if(ip_parts.length == 4){
-		if((ip_parts[0] >= 0) && (ip_parts[0] <= 255)){
-			if((ip_parts[1] >= 0) && (ip_parts[1] <= 255)){
-				if((ip_parts[2] >= 0) && (ip_parts[2] <= 255)){
-					if((ip_parts[3] >= 0) && (ip_parts[3] <= 255)){
-						return true;
-					}else{
-						return false;
-					}
-				}else{
-					return false;
-				}
-			}else{
-				return false;
-			}
-		}else{
-			return false;
-		}
-	}else{
-		return false;
-	}
-}
-
-function wps_check_valid_range(ip_start, ip_end){
-	var ip_start_parts = ip_start.split('.');
-	var ip_end_parts = ip_end.split('.');
-	if(ip_end_parts[0] > ip_start_parts[0]){
+	/*
+		Get start and ending parts of the IP
+		ranges.
+	*/
+	var ipStartParts = ipParts[0].split('.');
+	var ipEndParts = ipParts[1].split('.');
+	
+	/*
+		Checks the first parts
+		of the IP addresses.
+	*/
+	if( ipEndParts[0] > ipStartParts[0] ){
 		return true;
 	}else{
-		if((ip_end_parts[0] == ip_start_parts[0]) && (ip_end_parts[1] > ip_start_parts[1])){
+		/*
+			Checks the second parts
+			of the IP addresses.
+		*/
+		if( ( ipEndParts[0] == ipStartParts[0] ) && ( ipEndParts[1] > ipStartParts[1] ) ){
 			return true;
 		}else{
-			if((ip_end_parts[0] == ip_start_parts[0]) && (ip_end_parts[1] == ip_start_parts[1]) && (ip_end_parts[2] > ip_start_parts[2])){
+			/*
+				Checks the third parts
+				of the IP addresses.
+			*/
+			if( ( ipEndParts[0] == ipStartParts[0] ) && ( ipEndParts[1] == ipStartParts[1] ) && ( ipEndParts[2] > ipStartParts[2] ) ){
 				return true;
 			}else{
-				if((ip_end_parts[0] == ip_start_parts[0]) && (ip_end_parts[1] == ip_start_parts[1]) && (ip_end_parts[2] == ip_start_parts[2]) && (ip_end_parts[3] > ip_start_parts[3])){
+				/*
+					Checks the fourth parts
+					of the IP addresses.
+				*/
+				if( ( ipEndParts[0] == ipStartParts[0] ) && ( ipEndParts[1] == ipStartParts[1] ) && ( ipEndParts[2] == ipStartParts[2] ) && ( ipEndParts[3] > ipStartParts[3] ) ){
 					return true;
 				}else{
+					/*
+						If the second IP address
+						is before the first IP address
+						then the range is false.
+					*/
 					return false;
 				}
 			}
@@ -359,215 +179,198 @@ function wps_check_valid_range(ip_start, ip_end){
 	}
 }
 
-function wps_check_valid_subnet(subnet){
-	if((subnet >= 0) && (subnet <= 32) && (subnet != '')){
-		return true;
-	}else{
-		return false;
-	}
-}
-/*
-	Updates a valid preview hash
-*/
-function wps_update_preview_hash(){
-	var data = {
-		action: 'wps_generate_preview_hash_url'
-	}
+/*------------------------------------------------
+	Submits the new access rule to the server.
+------------------------------------------------*/
+function wpsAddAccessRule( type, rule, expiration ){
 	jQuery.ajax({
 		type: 'POST',
 		url: ajaxurl,
-		data: data,
-		async: false
-	}).done(function(response){
-		jQuery('#wps-share-url').val(response);
-		wps_reload_access_table();
+		data: {
+			action: 'wps_add_rule',
+			type: type,
+			rule: rule,
+			expiration: expiration
+		}
+	}).done( function( response ){
+		/*
+			Clear the new rule data from the
+			form.
+		*/
+		jQuery('#wps-access-rule').val('');
+
+		/*
+			Append the new rule to the table
+		*/
+		jQuery('table#wps-current-site-access tbody')
+			.append(
+				'<tr id="user-'+response.rule_id+'">'+
+					'<td>' + response.type + '</td>' +
+					'<td>' + response.rule + '</td>' +
+					'<td>' + response.added_by + '</td>' +
+					'<td>' + response.expiration + '</td>' +
+					'<td><a class="wps-remove-access" data-attr-type="user" data-attr-id="' + response.rule_id + '">Remove Access</a></td>' +
+				'</tr>'
+			);
+
+			/*
+				Unbinds existing click
+				handlers and rebinds the
+				newly added row's click
+				handlers
+			*/
+			jQuery('.wps-remove-access').unbind('click');
+
+			jQuery('.wps-remove-access').click(function(){
+				var ruleID = jQuery(this).attr('data-attr-id');
+				var type = jQuery(this).attr('data-attr-type');
+
+				wpsRemoveAccessRule( ruleID, type );
+			});
 	});
 }
 
-
-/*
-	Saves IP Ranges
-*/
-function wps_add_ip_range(){
-	var start = jQuery('#wps-ip-range-start').val();
-	var end = jQuery('#wps-ip-range-end').val();
-	var expire_time = jQuery('#wps-add-ip-range-address-expiration').val();
-	if(wps_check_valid_ip(start)){
-		jQuery('#wps-ip-range-start').css('border', '1px solid green');
-		if(wps_check_valid_ip(end)){
-			jQuery('#wps-ip-range-end').css('border', '1px solid green');
-			if(wps_check_valid_range(start, end)){
-				var data = {
-					action: 'wps_save_ip_ranges',
-					start_range: start,
-					end_range: end,
-					expires: expire_time
-				}
-				jQuery.ajax({
-					type: 'POST',
-					url: ajaxurl,
-					data: data,
-					async: false
-				}).done(function(response){
-					jQuery('#wps-ip-range-alert').html('IP Range Added!');
-					jQuery('#wps-ip-range-alert').show();
-					jQuery('#wps-ip-range-alert').fadeOut(3000);
-					wps_reload_access_table();
+/*------------------------------------------------
+	Removes an access rule
+------------------------------------------------*/
+function wpsRemoveAccessRule( ruleID, type ){
+	/*
+		Confirms that the user wants to delete
+		the access rule.
+	*/
+	if( confirm( 'Are you sure you want to remove this access rule?' ) ){
+		jQuery.ajax({
+			type: 'POST',
+			url: ajaxurl,
+			data: {
+				action: 'wps_remove_rule',
+				type: type,
+				rule: ruleID
+			}
+		}).done( function( response ){
+			/*
+				When completed, remove the rule from the
+				table.
+			*/
+			if( response.success ){
+				jQuery('#'+type+'-'+ruleID).fadeOut( 500, function(){
+					jQuery(this).remove();
 				});
-			}else{
-				jQuery('#wps-ip-range-start').css('border', '1px solid red');
-				jQuery('#wps-ip-range-end').css('border', '1px solid red');
-
-				jQuery('#wps-ip-range-alert').html('Invalid Range');
-				jQuery('#wps-ip-range-alert').removeClass('updated');
-				jQuery('#wps-ip-range-alert').addClass('error');
-				jQuery('#wps-ip-range-alert').show();
-				jQuery('#wps-ip-range-alert').fadeOut(3000);
 			}
-		}else{
-			jQuery('#wps-ip-range-end').css('border', '1px solid red');
-			jQuery('#wps-ip-range-alert').html('IP Invalid');
-			jQuery('#wps-ip-range-alert').removeClass('updated');
-			jQuery('#wps-ip-range-alert').addClass('error');
-			jQuery('#wps-ip-range-alert').show();
-			jQuery('#wps-ip-range-alert').fadeOut(3000);
-		}
-	}else{
-		jQuery('#wps-ip-range-start').css('border', '1px solid red');
-		jQuery('#wps-ip-range-alert').html('IP Invalid');
-		jQuery('#wps-ip-range-alert').removeClass('updated');
-		jQuery('#wps-ip-range-alert').addClass('error');
-		jQuery('#wps-ip-range-alert').show();
-		jQuery('#wps-ip-range-alert').fadeOut(3000);
-	}
-}
-
-/*
-	Removes an IP Range
-*/
-function wps_remove_range(start_ip, end_ip){
-	var wps_remove_range_confirm = confirm("Are you sure you want to remove this IP Range?");
-
-	if(wps_remove_range_confirm == true){
-		var data = {
-			action: 'wps_delete_ip_range',
-			start: start_ip,
-			end: end_ip
-		}
-		jQuery.ajax({
-			type: 'POST',
-			url: ajaxurl,
-			data: data,
-			async: false
-		}).done(function(response){
-			wps_reload_access_table();
 		});
 	}
 }
 
-function wps_network_remove_range(blog, start_ip, end_ip){
-	var wps_remove_range_confirm = confirm("Are you sure you want to remove this IP Range?");
-
-	if(wps_remove_range_confirm == true){
-		var data = {
-			action: 'wps_network_delete_ip_range',
-			start: start_ip,
-			end: end_ip,
-			blog_id: blog
-		}
+/*------------------------------------------------
+	Regenerates the preview URL
+------------------------------------------------*/
+function wpsRegenerateURL(){
+	/*
+		Confirms that the user wants to regenerate the URL.
+	*/
+	if( confirm('Are you sure you want to regenerate the preview url? This will invalidate and block all access for people with the previous url.') ){
 		jQuery.ajax({
 			type: 'POST',
 			url: ajaxurl,
-			data: data,
-			async: false
-		}).done(function(response){
-			wps_reload_network_access_table();
-		});
-	}
-}
-
-/*
-	Saves Subnets
-*/
-function wps_add_network(){
-	if(wps_check_valid_ip(jQuery('#wps-subnet-network').val())){
-		jQuery('#wps-subnet-network').css('border', '1px solid green');
-		if(wps_check_valid_subnet(jQuery('#wps-subnet-network-subnet').val())){
-			jQuery('#wps-subnet-network-subnet').css('border', '1px solid green');
-			var data = {
-				action: 'wps_save_subnets',
-				ip: jQuery('#wps-subnet-network').val(),
-				subnet: jQuery('#wps-subnet-network-subnet').val(),
-				expiration: jQuery('#wps-add-network-expiration').val()
+			data: {
+				action: 'wps_regenerate_url'
 			}
-			jQuery.ajax({
-				type: 'POST',
-				url: ajaxurl,
-				data: data,
-				async: false
-			}).done(function(response){
-				jQuery('#wps-subnet-alert').html('Subnet Added!');
-				jQuery('#wps-subnet-alert').show();
-				jQuery('#wps-subnet-alert').fadeOut(3000);
-				wps_reload_access_table();
-			});
+		}).done( function( response ){
+			/*
+				Sets the new url to be copied.
+			*/
+			jQuery('#wps-share-url').val( response.preview_url );
+		});
+	}
+}
+
+/*------------------------------------------------
+	Saves the settings from the admin page
+------------------------------------------------*/
+function wpsSaveSettings(){
+	/*
+		Grabs all of the user's settings
+	*/
+	var publicAccess 		= jQuery('input[name="wps-public-access-setting"]:checked').val();
+	var defaultPage 		= jQuery('#wps-default-page').val();
+	var expirationTime 		= jQuery('#wps-default-expiration').val();
+
+	jQuery.ajax({
+		type: 'POST',
+		url: ajaxurl,
+		data: {
+			action: 'wps_save_settings',
+			public_access: publicAccess,
+			default_page: defaultPage,
+			expiration_time: expirationTime
+		}
+	}).done( function( response ){
+		jQuery('#wps-settings-saved').show();
+
+		/*
+			Hides the disabled banner and adjusts
+			the admin bar status.
+		*/
+		if( response.public_access == '0' ){
+			jQuery('#wps-disabled-banner').removeClass('wps-disabled-banner-enabled');
+
+			jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').removeClass('wps-admin-bar-enabled');
+			jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').addClass('wps-admin-bar-disabled');
+			jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification .ab-item').html('WP Sandbox Disabled');
 		}else{
-			jQuery('#wps-subnet-network-subnet').css('border', '1px solid red');
-			jQuery('#wps-subnet-alert').html('Subnet Invalid');
-			jQuery('#wps-subnet-alert').removeClass('updated');
-			jQuery('#wps-subnet-alert').addClass('error');
-			jQuery('#wps-subnet-alert').show();
-			jQuery('#wps-subnet-alert').fadeOut(3000);
+			jQuery('#wps-disabled-banner').addClass('wps-disabled-banner-enabled');
+
+			jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').removeClass('wps-admin-bar-disabled');
+			jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification').addClass('wps-admin-bar-enabled');
+			jQuery('#wp-admin-bar-wps-sandbox-admin-bar-notification .ab-item').html('WP Sandbox Enabled');
 		}
+	});
+}
+
+/*------------------------------------------------
+	Selects or deselects all the blog checkboxes 
+	on the network admin page
+------------------------------------------------*/
+function wpsSelectDeselectAllBlogs( enabled ){
+	if( enabled ){
+		jQuery('.wps-network-enable-checkbox').each(function(){
+			this.checked = true;
+		});
 	}else{
-		jQuery('#wps-subnet-network').css('border', '1px solid red');
-		jQuery('#wps-subnet-alert').html('IP Invalid');
-		jQuery('#wps-subnet-alert').removeClass('updated');
-		jQuery('#wps-subnet-alert').addClass('error');
-		jQuery('#wps-subnet-alert').show();
-		jQuery('#wps-subnet-alert').fadeOut(3000);
-	}
-}
-
-/*
-	Removes a Subnet
-*/
-function wps_remove_subnet(ip, subnet){
-	var wps_remove_subnet_confirm = confirm("Are you sure you want to remove this network?");
-
-	if(wps_remove_subnet_confirm == true){
-		var data = {
-			action: 'wps_remove_subnet',
-			start_ip: ip,
-			subnet_extension: subnet
-		}
-		jQuery.ajax({
-			type: 'POST',
-			url: ajaxurl,
-			data: data,
-			async: false
-		}).done(function(response){
-			wps_reload_access_table();
+		jQuery('.wps-network-enable-checkbox').each(function(){
+			this.checked = false;
 		});
 	}
 }
-function wps_network_remove_subnet(blog, ip, subnet){
-	var wps_remove_subnet_confirm = confirm("Are you sure you want to remove this network?");
 
-	if(wps_remove_subnet_confirm == true){
-		var data = {
-			action: 'wps_network_remove_subnet',
-			start_ip: ip,
-			subnet_extension: subnet,
-			blog_id: blog
+/*------------------------------------------------
+	Submits enabled and disabled changes
+------------------------------------------------*/
+function wpsSubmitEnabledDisabledChanges(){
+	var siteStatus = [];
+
+	var counter = 0;
+
+	/*
+		Gets all of the site statuses set for
+		being sent along with the id of the sites.
+	*/
+	jQuery('.wps-network-enable-checkbox').each(function(){
+		siteStatus[ counter ] = { "id": this.value, "active": this.checked };
+		counter++;
+	});
+
+	/*
+		Submits the changes
+	*/
+	jQuery.ajax({
+		type: 'POST',
+		url: ajaxurl,
+		data: {
+			action: 'wps_enable_disable_blogs',
+			status: siteStatus
 		}
-		jQuery.ajax({
-			type: 'POST',
-			url: ajaxurl,
-			data: data,
-			async: false
-		}).done(function(response){
-			wps_reload_network_access_table();
-		});
-	}
+	}).done( function( response ){
+		jQuery('#wps-settings-saved').show();
+	});
 }
