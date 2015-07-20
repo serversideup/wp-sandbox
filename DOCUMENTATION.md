@@ -11,16 +11,19 @@ Once installed, you will see a link on the admin bar where you can adjust your s
 This screen allows you to manage all of the settings for your site.
 
 ### Public Access
-DEFAULT: Allowed (Public can view the site)
+*DEFAULT: Allowed (Public can view the site)*
+
 You can have this plugin installed and allow public access to the site.  If this is set to 'Allowed', the public will be able to access the site, essentially by-passing any functionality from the plugin. If this is set to 'Blocked', all requests get filtered for access by the plugin using the defined access rules for the site.
 
 ### Default Page
-DEFAULT: 404 (Uses the 404 HTTP code and shows the 404 page template)
+*DEFAULT: 404 (Uses the 404 HTTP code and shows the 404 page template)*
+
 If a user is NOT granted access to your site, this page will show. The dropdown consists of all pages your site contains. It also includes a 404 option which finds the 404 page template and displays that.  This allows you to customize a page possibly with the theme you are developing that explains to the user that the site is under construction.
 
 ### Default Expiration
-DEFAULT: Never (Access rules never expire by default)
-THe default expiration is how long each access rule has to live.  If it's never, the access rule will never expire.  If default expiration is a day then you can add an access rule and it will be granted access for 1 day. After that day is up, it will be removed from the database and anyone with that would have fit that access rule the day before would not be granted access.
+*DEFAULT: Never (Access rules never expire by default)*
+
+The default expiration is how long each access rule has to live.  If it's never, the access rule will never expire.  If default expiration is a day then you can add an access rule and it will be granted access for 1 day. After that day is up, it will be removed from the database and anyone with that would have fit that access rule the day before would not be granted access.
 
 ## Access Rules
 There are 5 different ways to add access rules. The Preview URL is the only one that doesn't have a set expiration time.  However if you regenerate the Preview URL it will block access to anyone who previously had access. From the 'Access' page the user is able to copy the Preview URL and regenerate it if necessary. They can also add and delete access rules. With IP access rules, CloudFlare works right out of the box! If you implement CloudFlare during the development stage, WP-Sandbox grabs the referring IP (the specific IP to the user) and uses that to determine access.
