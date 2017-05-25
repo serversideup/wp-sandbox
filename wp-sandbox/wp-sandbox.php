@@ -1,11 +1,11 @@
 <?php
 /*
 	Plugin Name: WP Sandbox
-	Plugin URI: http://open.521dimensions.com
-	Description: Conveniently blocks out users during development without interferring with testing
-	Author: Dan Pastori
+	Plugin URI: https://521dimensions.com/open-source/wp-sandbox
+	Description: Conveniently blocks out users during development without interfering with testing
+	Author: 521 Dimensions
 	Version: 1.0
-	Author URI: http://www.521dimensions.com
+	Author URI: https://521dimensions.com
 */
 
 
