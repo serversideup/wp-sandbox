@@ -12,66 +12,53 @@
  * @subpackage WP_Sandbox/admin/partials
  */
 ?>
+<img class="wps-header-logo" src="<?php echo plugins_url().'/wp-sandbox/admin/images/wp-sandbox-logo-large.png'; ?>"/>
 
-<!-- This file should primarily consist of HTML with a little bit of PHP. -->
-/* Start top logo display */
-			echo '<img class="wps-header-logo" src="'.plugins_url().'/wp-sandbox/images/wp-sandbox-logo-large.png"/>';
-			/* End top logo display */
+<br>Version: <?php echo $version; ?><br>
 
-			/* Start top version display */
-			echo '<br>Version: '.$version.'<br>';
-			/* End top version display */
+<div id="wps-disabled-banner" <?php echo ( $enabled == '1' ? 'class="wps-disabled-banner-enabled"' : '' ); ?>>
+	WP Sandbox is currently <strong>DISABLED</strong>. Public users are able to access <?php echo home_url('/'); ?>
+</div>
 
-			/* Start plugin status banner */
-			echo '<div id="wps-disabled-banner" '.( $enabled == '1' ? 'class="wps-disabled-banner-enabled"' : '' ).'>';
-				echo 'WP Sandbox is currently <strong>DISABLED</strong>. Public users are able to access '.home_url('/');
-			echo '</div>';
-			/* End plugin status banner */
+<div id="wps-settings-saved" class="updated">
+	WP Sandbox settings saved
+</div>
 
-			/* Start plugin settings saved banner */
-			echo '<div id="wps-settings-saved" class="updated">';
-				echo 'WP Sandbox settings saved';
-			echo '</div>';
-			/* End plugin settings saved banner */
+<div class="wrap">
+	<div class="wps-panel">
+		<h3>WP Sandbox Settings</h3>
+		<hr>
 
-			/* Start WPS Settings */
-			echo '<div class="wrap">';
-				echo '<div class="wps-panel">';
-					echo '<h3>WP Sandbox Settings</h3>';
-					echo '<hr>';
+		<label class="wps-label wps-large-label">Public Access: </label>
+		<input type="radio" class="wps-radio" name="wps-public-access-setting" value="0" <?php echo ( $enabled == '0' ? 'checked="checked"' : '' ); ?> /><span class="wps-radio-label">Allowed</span>
+		<input type="radio" class="wps-radio" name="wps-public-access-setting" value="1" <?php echo ( $enabled == '1' ? 'checked="checked"' : '' ); ?> /><span class="wps-radio-label">Blocked</span>
+		
+		<br><br>
 
-					/* Allow public access to the site. */
-					echo '<label class="wps-label wps-large-label">Public Access: </label>';
-					echo '<input type="radio" class="wps-radio" name="wps-public-access-setting" value="0" '.( $enabled == '0' ? 'checked="checked"' : '' ) .'/><span class="wps-radio-label">Allowed</span>';
-					echo '<input type="radio" class="wps-radio" name="wps-public-access-setting" value="1" '.( $enabled == '1' ? 'checked="checked"' : '' ) .'/><span class="wps-radio-label">Blocked</span>';
-					
-					echo '<br><br>';
+		<label class="wps-label wps-large-label">Default Page: </label>
+		<select name="wps-default-page" id="wps-default-page">
+			<option value="blank" <?php echo ( $defaultPage == 'blank' ? 'selected="selected"' : '' ); ?>>Blank</option>
+			<option value="404" <?php echo ( $defaultPage == '404' ? 'selected="selected"' : '' ); ?>>404</option>
+			<?php foreach( $pages as $page ){ ?>
+				<option value="<?php echo get_page_link( $page->ID ); ?>" <?php echo ( $defaultPage == get_page_link( $page->ID ) ? 'selected="selected"' : '' ); ?>><?php echo $page->post_title; ?></option>
+			<?php } ?>
+		</select>
 
-					/* Set the default page for unauthorized users */
-					echo '<label class="wps-label wps-large-label">Default Page: </label>';
-					echo '<select name="wps-default-page" id="wps-default-page">';
-						echo '<option value="blank" '.( $defaultPage == 'blank' ? 'selected="selected"' : '' ).'>Blank</option>';
-						echo '<option value="404" '.( $defaultPage == '404' ? 'selected="selected"' : '' ).'>404</option>';
-						foreach( $pages as $page ){
-							echo '<option value="'.get_page_link( $page->ID ).'" '.( $defaultPage == get_page_link( $page->ID ) ? 'selected="selected"' : '' ).'>'.$page->post_title.'</option>';
-						}
-					echo '</select>';
-					echo '<p>This is the page that will display if the user is unauthorized to view a page. Using this feature allows you to create a custom landing page for unauthorized users.</p>';
+		<p>This is the page that will display if the user is unauthorized to view a page. Using this feature allows you to create a custom landing page for unauthorized users.</p>
 
-					echo '<br>';
+		<br>
 
-					/* Sets the default expiration time for new access rules*/
-					echo '<label class="wps-label wps-large-label">Default Expiration: </label>';
-					echo '<select id="wps-default-expiration" name="wps-default-expiration">';
-						echo '<option value="day" '.( $defaultExpirationTime == 'day' ? 'selected="selected"' : '' ).'>Day</option>';
-						echo '<option value="week" '.( $defaultExpirationTime == 'week' ? 'selected="selected"' : '' ).'>Week</option>';
-						echo '<option value="twoweeks" '.( $defaultExpirationTime == 'twoweeks' ? 'selected="selected"' : '' ).'>Two Weeks</option>';
-						echo '<option value="never" '.( $defaultExpirationTime == 'never' ? 'selected="selected"' : '' ).'>Never</option>';
-					echo '</select>';
 
-					echo '<p>When a user logs into Wordpress, their IP will be authenticated for future access. You can control how long this IP should remain authenticated for.</p>';
-					
-					echo '<a class="button button-primary" id="wps-save-settings"/>Save Changes</a>';
-				echo '</div>';
-			echo '</div>';
-			/* End WPS Settings */
+		<label class="wps-label wps-large-label">Default Expiration: </label>
+		<select id="wps-default-expiration" name="wps-default-expiration">
+			<option value="day" <?php echo ( $defaultExpirationTime == 'day' ? 'selected="selected"' : '' ); ?>>Day</option>
+			<option value="week" <?php echo ( $defaultExpirationTime == 'week' ? 'selected="selected"' : '' ); ?>>Week</option>
+			<option value="twoweeks" <?php echo ( $defaultExpirationTime == 'twoweeks' ? 'selected="selected"' : '' ); ?>>Two Weeks</option>
+			<option value="never" <?php echo ( $defaultExpirationTime == 'never' ? 'selected="selected"' : '' ); ?>'>Never</option>
+		</select>
+
+		<p>When a user logs into Wordpress, their IP will be authenticated for future access. You can control how long this IP should remain authenticated for.</p>
+		
+		<a class="button button-primary" id="wps-save-settings"/>Save Changes</a>
+	</div>
+</div>

@@ -220,7 +220,7 @@ function wpsAddAccessRule( type, rule, expiration ){
 		type: 'POST',
 		url: ajaxurl,
 		data: {
-			action: 'wps_add_rule',
+			action: 'wp_sandbox_add_rule',
 			type: type,
 			rule: rule,
 			expiration: expiration
@@ -276,7 +276,7 @@ function wpsRemoveAccessRule( ruleID, type ){
 			type: 'POST',
 			url: ajaxurl,
 			data: {
-				action: 'wps_remove_rule',
+				action: 'wp_sandbox_remove_rule',
 				type: type,
 				rule: ruleID
 			}
@@ -306,7 +306,7 @@ function wpsRegenerateURL(){
 			type: 'POST',
 			url: ajaxurl,
 			data: {
-				action: 'wps_regenerate_url'
+				action: 'wp_sandbox_regenerate_url'
 			}
 		}).done( function( response ){
 			/*
@@ -332,7 +332,7 @@ function wpsSaveSettings(){
 		type: 'POST',
 		url: ajaxurl,
 		data: {
-			action: 'wps_save_settings',
+			action: 'wp_sandbox_save_settings',
 			public_access: publicAccess,
 			default_page: defaultPage,
 			expiration_time: expirationTime
@@ -400,7 +400,7 @@ function wpsSubmitEnabledDisabledChanges(){
 		type: 'POST',
 		url: ajaxurl,
 		data: {
-			action: 'wps_enable_disable_blogs',
+			action: 'wp_sandbox_enable_disable_blogs',
 			status: siteStatus
 		}
 	}).done( function( response ){

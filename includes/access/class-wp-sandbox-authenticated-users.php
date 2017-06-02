@@ -47,7 +47,7 @@ class WP_Sandbox_Authenticated_Users{
 
 			restore_current_blog();
 		}else{
-			$authenticatedUsers = $wpdb->pget_results( 
+			$authenticatedUsers = $wpdb->get_results( 
 				"SELECT * 
 				 FROM ".$wpdb->prefix."wps_authenticated_users",
 			ARRAY_A );
@@ -63,16 +63,29 @@ class WP_Sandbox_Authenticated_Users{
 	public static function deleteAuthenticatedUser( $authenticatedUserID ){
 		global $wpdb;
 
-		global $switched;
-		switch_to_blog(1);
+		if( is_multisite() ){
+			$currentBlogID = get_current_blog_id();
+			
+			global $switched;
 
-		$wpdb->query( $wpdb->prepare( 
-			"DELETE FROM ".$wpdb->prefix."wps_authenticated_users
-			 WHERE id = '%d'",
-			 $authenticatedUserID
-		) );
+			switch_to_blog(1);
 
-		restore_current_blog();
+			$wpdb->query( $wpdb->prepare( 
+				"DELETE FROM ".$wpdb->prefix."wps_authenticated_users
+				 WHERE id = '%d'
+				 AND blog_id = '%d'",
+				 $authenticatedUserID,
+				 $currentBlogID
+			) );
+
+			restore_current_blog();
+		}else{
+			$wpdb->query( $wpdb->prepare( 
+				"DELETE FROM ".$wpdb->prefix."wps_authenticated_users
+				 WHERE id = '%d'",
+				 $authenticatedUserID
+			) );
+		}
 	}
 
 	/*------------------------------------------------

@@ -121,7 +121,7 @@ class WP_Sandbox_Preview_URL{
 				hash from the query
 			*/
 			if( $checkHash == $hash ){
-				$defaultExpirationTime = WPSSettings::getDefaultExpirationTime();
+				$defaultExpirationTime = WP_Sandbox_Settings::getDefaultExpirationTime();
 
 				/*
 					If never, then the cookie is set to expire
@@ -151,7 +151,7 @@ class WP_Sandbox_Preview_URL{
 		if( isset( $_COOKIE['wp-sandbox-preview-hash'] ) ){
 			$hash 		= $_COOKIE['wp-sandbox-preview-hash'];
 
-			$checkHash 	= WPSPreviewURL::getPreviewHash();
+			$checkHash 	= WP_Sandbox_Preview_URL::getPreviewHash();
 
 			/*
 				If the cookie is set and matches

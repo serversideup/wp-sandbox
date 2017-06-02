@@ -48,6 +48,9 @@ function deactivate_wp_sandbox() {
 	WP_Sandbox_Deactivator::deactivate();
 }
 
+/**
+ * Registers the activation and deactivation hooks
+ */
 register_activation_hook( __FILE__, 'activate_wp_sandbox' );
 register_deactivation_hook( __FILE__, 'deactivate_wp_sandbox' );
 

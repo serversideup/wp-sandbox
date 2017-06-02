@@ -6,12 +6,12 @@ class WP_Sandbox_Network_Admin_Pages{
 	}
 
 	public function network_menu(){
-		$sites = WPSSettings::getSitesStatus();
+		$sites = WP_Sandbox_Settings::getSitesStatus();
 
-		$authenticatedUsers = WPSAuthenticatedUsers::getNetworkAuthenticatedUsers();
-		$ips 				= WPSIP::getNetworkAuthenticatedIPs();
-		$ipRanges 			= WPSIPRange::getNetworkAuthenticatedIPRanges();
-		$subnets 			= WPSSubnet::getNetworkAuthenticatedSubnets();
+		$authenticatedUsers = WP_Sandbox_AuthenticatedUsers::getNetworkAuthenticatedUsers();
+		$ips 				= WP_Sandbox_IP::getNetworkAuthenticatedIPs();
+		$ipRanges 			= WP_Sandbox_IP_Range::getNetworkAuthenticatedIPRanges();
+		$subnets 			= WP_Sandbox_Subnet::getNetworkAuthenticatedSubnets();
 
 		$version = get_option( "wp_sandbox_version" );
 

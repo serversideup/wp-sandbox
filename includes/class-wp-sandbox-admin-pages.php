@@ -57,13 +57,13 @@ class WP_Sandbox_Admin_Pages{
 			Displays the sandbox access page
 		------------------------------------------------*/
 		public function wpsAccessPage(){
-			$previewHash 			= WPSPreviewURL::getPreviewHash();
-			$defaultExpirationTime 	= WPSSettings::getDefaultExpirationTime();
+			$previewHash 			= WP_Sandbox_Preview_URL::getPreviewHash();
+			$defaultExpirationTime 	= WP_Sandbox_Settings::getDefaultExpirationTime();
 			
-			$authenticatedUsers 	= WPSAuthenticatedUsers::getAuthenticatedUsers();
-			$ips 					= WPSIP::getIPs();
-			$ipRanges 				= WPSIPRange::getIPRanges();
-			$subnets 				= WPSSubnet::getSubnets();
+			$authenticatedUsers 	= WP_Sandbox_Authenticated_Users::getAuthenticatedUsers();
+			$ips 					= WP_Sandbox_IP::getIPs();
+			$ipRanges 				= WP_Sandbox_IP_Range::getIPRanges();
+			$subnets 				= WP_Sandbox_Subnet::getSubnets();
 			
 			$previewURL = home_url('/').'?wp-sandbox-preview='.$previewHash;
 

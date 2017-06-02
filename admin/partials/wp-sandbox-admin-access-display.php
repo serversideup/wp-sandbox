@@ -18,125 +18,114 @@
 <img class="wps-header-logo" src="<?php echo plugins_url(); ?>/wp-sandbox/images/wp-sandbox-logo-large.png"/>
 <br>Version: <?php echo $version; ?><br>
 
-			/* Begin Private URL Panel */
-			echo '<div class="wrap">';
-				echo '<div class="wps-panel">';
-					echo '<h3>Private URL</h3>';
-					echo '<hr>';
-					echo '<label class="wps-label">Share URL: </label>';
-					echo '<input type="text" class="wps-text" name="wps-share-url" id="wps-share-url" value="'.$previewURL.'" readonly/>';
-					
-					echo '<p>Copy the URL above to share with users who need access without IP authentication. NOTE: Any user with this URL will be able to access the site unless the URL is regenerated.</p>';
-					
-					echo '<button id="wps-regenerate-url" class="button button-primary">Regenerate URL</button>';
-				echo '</div>';
-			echo '</div>';
-			/* End Private URL Panel */
+<div class="wrap">
+	<div class="wps-panel">
+		<h3>Private URL</h3>
+		<hr>
+		<label class="wps-label">Share URL: </label>
+		<input type="text" class="wps-text" name="wps-share-url" id="wps-share-url" value="<?php echo $previewURL; ?>" readonly/>
+		
+		<p>Copy the URL above to share with users who need access without IP authentication. NOTE: Any user with this URL will be able to access the site unless the URL is regenerated.</p>
+		
+		<button id="wps-regenerate-url" class="button button-primary">Regenerate URL</button>
+	</div>
+</div>
 
-			/* Begin Add Access Panel */
-			echo '<div class="wrap">';
-				echo '<div class="wps-panel">';
-					echo '<h3>Access List</h3>';
-					echo '<hr>';
-					echo '<label class="wps-label">Access Rule: </label>';
-					echo '<input type="text" class="wps-text" name="wps-access-rule" id="wps-access-rule" value=""/>';
+<div class="wrap">
+	<div class="wps-panel">
+		<h3>Access List</h3>
+		<hr>
+		<label class="wps-label">Access Rule: </label>
+		<input type="text" class="wps-text" name="wps-access-rule" id="wps-access-rule" value=""/>
 
-					echo '<br>';
+		<br>
 
-					echo '<label class="wps-label">Expires: </label>';
-					echo '<select id="wps-expiration" name="wps-expiration">';
-						echo '<option value="day" '.( $defaultExpirationTime == 'day' ? 'selected="selected"' : '' ).'>Day</option>';
-						echo '<option value="week" '.( $defaultExpirationTime == 'week' ? 'selected="selected"' : '' ).'>Week</option>';
-						echo '<option value="twoweeks" '.( $defaultExpirationTime == 'twoweek' ? 'selected="selected"' : '' ).'>Two Weeks</option>';
-						echo '<option value="never" '.( $defaultExpirationTime == 'never' ? 'selected="selected"' : '' ).'>Never</option>';
-					echo '</select>';
+		<label class="wps-label">Expires: </label>
+		<select id="wps-expiration" name="wps-expiration">
+			<option value="day" <?php echo ( $defaultExpirationTime == 'day' ? 'selected="selected"' : '' ); ?>'>Day</option>
+			<option value="week" <?php echo ( $defaultExpirationTime == 'week' ? 'selected="selected"' : '' ); ?>'>Week</option>
+			<option value="twoweeks" <?php echo ( $defaultExpirationTime == 'twoweek' ? 'selected="selected"' : '' ); ?>'>Two Weeks</option>
+			<option value="never" <?php echo ( $defaultExpirationTime == 'never' ? 'selected="selected"' : '' ); ?>'>Never</option>
+		</select>
 
-					echo '<br><br>';
-					echo '<div id="wps-access-rule-validation" class="validation">Please enter a valid access rule.</div>';
-					echo '<button id="wps-add-access-rule" class="button button-primary">Add Access Rule</button>';
-				
-					echo '<p>You can add an IP address, IP range, or a subnet by using the input box above. The following methods are supported: <br><br>';
-					echo '<strong>Single IP Address:</strong> 192.168.1.100<br>';
-					echo '<strong>IP Address Range:</strong> 192.168.1.100-192.168.1.199<br>';
-					echo '<strong>Network Address:</strong> 192.168.1.0/24<br>';
-				echo '</div>';
-			echo '</div>';
-			/* End Add Access Panel */
+		<br><br>
+		<div id="wps-access-rule-validation" class="validation">Please enter a valid access rule.</div>
+		<button id="wps-add-access-rule" class="button button-primary">Add Access Rule</button>
+	
+		<p>You can add an IP address, IP range, or a subnet by using the input box above. The following methods are supported: <br><br>
+		<strong>Single IP Address:</strong> 192.168.1.100<br>
+		<strong>IP Address Range:</strong> 192.168.1.100-192.168.1.199<br>
+		<strong>Network Address:</strong> 192.168.1.0/24<br>
+	</div>
+</div>
 
-			/* Begin Current Site Access Panel */
-			echo '<div class="wrap">';
-				echo '<div class="wps-panel">';
-					echo '<h3>Current Site Access</h3>';
-					echo '<hr>';
-					echo '<table class="wps-table" id="wps-current-site-access">';
-						echo '<thead>';
-							echo '<tr>';
-								echo '<td>Type</td>';
-								echo '<td>Network/IPs</td>';
-								echo '<td>Added By</td>';
-								echo '<td>Expires</td>';
-								echo '<td></td>';
-							echo '</tr>';
-						echo '</thead>';
-						echo '<tbody>';
-							/*
-								Authenticated Users
-							*/
-							foreach( $authenticatedUsers as $authenticatedUser ){
-								$user = get_userdata( $authenticatedUser['user_id'] );
+<div class="wrap">
+	<div class="wps-panel">
+		<h3>Current Site Access</h3>
+		<hr>
+		<table class="wps-table" id="wps-current-site-access">
+			<thead>
+				<tr>
+					<td>Type</td>
+					<td>Network/IPs</td>
+					<td>Added By</td>
+					<td>Expires</td>
+					<td></td>
+				</tr>
+			</thead>
+			<tbody>
+			<?php
+				foreach( $authenticatedUsers as $authenticatedUser ){
+					$user = get_userdata( $authenticatedUser['user_id'] );
+			?>
+					<tr id="user-<?php echo $authenticatedUser['id']; ?>">
+						<td>User (<?php echo $user->user_login; ?>)</td>
+						<td><?php echo $authenticatedUser['ip']; ?></td>
+						<td>-</td>
+						<td><?php echo ( $authenticatedUser['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $authenticatedUser['expires'] ) ) ); ?></td>
+						<td><a class="wps-remove-access" data-attr-type="user" data-attr-id="<?php echo $authenticatedUser['id']; ?>">Remove Access</a></td>
+					</tr>
+			<?php } ?> 
 
-								echo '<tr id="user-'.$authenticatedUser['id'].'">';
-									echo '<td>User ('.$user->user_login.')</td>';
-									echo '<td>'.$authenticatedUser['ip'].'</td>';
-									echo '<td>-</td>';
-									echo '<td>'.( $authenticatedUser['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $authenticatedUser['expires'] ) ) ).'</td>';
-									echo '<td><a class="wps-remove-access" data-attr-type="user" data-attr-id="'.$authenticatedUser['id'].'">Remove Access</a></td>';
-								echo '</tr>';
-							} 
-							/*
-								IPs
-							*/
-							foreach( $ips as $ip ){
-								$user = get_userdata( $ip['added_by'] );
+			<?php
+				foreach( $ips as $ip ){
+					$user = get_userdata( $ip['added_by'] );
+			?>
+					<tr id="single-<?php echo $ip['id']; ?>">
+						<td>Single IP</td>
+						<td><?php echo $ip['ip']; ?></td>
+						<td><?php echo $user->user_login; ?></td>
+						<td><?php echo ( $ip['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $ip['expires'] ) ) ); ?></td>
+						<td><a class="wps-remove-access" data-attr-type="single" data-attr-id="<?php echo $ip['id']; ?>">Remove Access</a></td>
+					</tr>
+			<?php } ?>
 
-								echo '<tr id="single-'.$ip['id'].'">';
-									echo '<td>Single IP</td>';
-									echo '<td>'.$ip['ip'].'</td>';
-									echo '<td>'.$user->user_login.'</td>';
-									echo '<td>'.( $ip['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $ip['expires'] ) ) ).'</td>';
-									echo '<td><a class="wps-remove-access" data-attr-type="single" data-attr-id="'.$ip['id'].'">Remove Access</a></td>';
-								echo '</tr>';
-							}
-							/*
-								IP Range
-							*/
-							foreach( $ipRanges as $ipRange ){
-								$user = get_userdata( $ipRange['added_by'] );
+			<?php
+				foreach( $ipRanges as $ipRange ){
+					$user = get_userdata( $ipRange['added_by'] );
+			?>
+					<tr id="range-'.$ipRange['id'].'">
+						<td>IP Range</td>
+						<td><?php echo $ipRange['start_ip'].'-'.$ipRange['end_ip']; ?></td>
+						<td><?php echo $user->user_login; ?></td>
+						<td><?php echo ( $ipRange['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $ipRange['expires'] ) ) ); ?></td>
+						<td><a class="wps-remove-access" data-attr-type="range" data-attr-id="<?php echo $ipRange['id']; ?>">Remove Access</a></td>
+					</tr>
+			<?php } ?>
 
-								echo '<tr id="range-'.$ipRange['id'].'">';
-									echo '<td>IP Range</td>';
-									echo '<td>'.$ipRange['start_ip'].'-'.$ipRange['end_ip'].'</td>';
-									echo '<td>'.$user->user_login.'</td>';
-									echo '<td>'.( $ipRange['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $ipRange['expires'] ) ) ).'</td>';
-									echo '<td><a class="wps-remove-access" data-attr-type="range" data-attr-id="'.$ipRange['id'].'">Remove Access</a></td>';
-								echo '</tr>';
-							}
-
-							/*
-								Networks
-							*/
-							foreach( $subnets as $subnet ){
-								$user = get_userdata( $subnet['added_by'] );
-								
-								echo '<tr id="subnet-'.$subnet['id'].'">';
-									echo '<td>Network</td>';
-									echo '<td>'.$subnet['start_ip'].'/'.$subnet['subnet'].'</td>';
-									echo '<td>'.$user->user_login.'</td>';
-									echo '<td>'.( $subnet['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $subnet['expires'] ) ) ).'</td>';
-									echo '<td><a class="wps-remove-access" data-attr-type="subnet" data-attr-id="'.$subnet['id'].'">Remove Access</a></td>';
-								echo '</tr>';
-							}
-						echo '</tbody>';
-					echo '</table>';
-				echo '</div>';
-			echo '</div>';
+			<?php
+				foreach( $subnets as $subnet ){
+					$user = get_userdata( $subnet['added_by'] );
+			?>
+					<tr id="subnet-'.$subnet['id'].'">
+						<td>Network</td>
+						<td><?php echo $subnet['start_ip'].'/'.$subnet['subnet']; ?></td>
+						<td><?php echo $user->user_login; ?></td>
+						<td><?php echo ( $subnet['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $subnet['expires'] ) ) ); ?></td>
+						<td><a class="wps-remove-access" data-attr-type="subnet" data-attr-id="<?php echo $subnet['id']; ?>">Remove Access</a></td>
+					</tr>
+			<?php } ?>
+			</tbody>
+		</table>
+	</div>
+</div>

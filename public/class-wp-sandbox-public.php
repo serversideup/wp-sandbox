@@ -6,8 +6,8 @@
  * @link       https://521dimensions.com
  * @since      1.0.0
  *
- * @package    Wp_Sandbox
- * @subpackage Wp_Sandbox/public
+ * @package    WP_Sandbox
+ * @subpackage WP_Sandbox/public
  */
 
 /**
@@ -16,8 +16,8 @@
  * Defines the plugin name, version, and two examples hooks for how to
  * enqueue the admin-specific stylesheet and JavaScript.
  *
- * @package    Wp_Sandbox
- * @subpackage Wp_Sandbox/public
+ * @package    WP_Sandbox
+ * @subpackage WP_Sandbox/public
  * @author     521 Dimensions <dan@521dimensions.com>
  */
 class WP_Sandbox_Public {
@@ -48,10 +48,8 @@ class WP_Sandbox_Public {
 	 * @param      string    $version    The version of this plugin.
 	 */
 	public function __construct( $plugin_name, $version ) {
-
 		$this->plugin_name = $plugin_name;
 		$this->version = $version;
-
 	}
 
 	/**
@@ -60,21 +58,7 @@ class WP_Sandbox_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_styles() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Wp_Sandbox_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Wp_Sandbox_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wp-sandbox-public.css', array(), $this->version, 'all' );
-
 	}
 
 	/**
@@ -83,30 +67,36 @@ class WP_Sandbox_Public {
 	 * @since    1.0.0
 	 */
 	public function enqueue_scripts() {
-
-		/**
-		 * This function is provided for demonstration purposes only.
-		 *
-		 * An instance of this class should be passed to the run() function
-		 * defined in Wp_Sandbox_Loader as all of the hooks are defined
-		 * in that particular class.
-		 *
-		 * The Wp_Sandbox_Loader will then create the relationship
-		 * between the defined hooks and the functions defined in this
-		 * class.
-		 */
-
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-sandbox-public.js', array( 'jquery' ), $this->version, false );
-
 	}
 
+	/**
+	 * Puts a badge on the admin bar to show the user if Sandbox is activated or not.
+	 *
+	 * @since    1.0.0
+	 */
 	public function wp_before_admin_bar_render(){
+		/*
+			If the user is not a network admin, we add the badge.
+		*/
 		if( !is_network_admin() ){
+			/*
+				Gets the plugin status.
+			*/
 			$pluginStatus = WP_Sandbox_Settings::getPluginStatus();
 
+			/*
+				If the plugin is on, show the enabled badge
+			*/
 			if( $pluginStatus != '0' ){
+				/*
+					Get the global admin bar
+				*/
 				global $wp_admin_bar;
 
+				/*
+					Add the menu badge link that WP Sandbox is enabled
+				*/
 				$wp_admin_bar->add_menu( array(
 					'parent' => false, 
 					'id' => 'wp-sandbox-admin-bar-notification',
@@ -115,8 +105,14 @@ class WP_Sandbox_Public {
 					'meta' => array( 'class' => 'ab-top-secondary wps-admin-bar-enabled' )
 				));
 			}else{
+				/*
+					Get the global admin bar
+				*/
 				global $wp_admin_bar;
 
+				/*
+					Add the menu badge link that WP Sandbox is disabled
+				*/
 				$wp_admin_bar->add_menu( array(
 					'parent' => false, 
 					'id' => 'wp-sandbox-admin-bar-notification',
@@ -127,5 +123,4 @@ class WP_Sandbox_Public {
 			}
 		}
 	}
-
 }
