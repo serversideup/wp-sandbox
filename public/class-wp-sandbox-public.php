@@ -83,7 +83,7 @@ class WP_Sandbox_Public {
 			/*
 				Gets the plugin status.
 			*/
-			$pluginStatus = WP_Sandbox_Settings::getPluginStatus();
+			$pluginStatus = WP_Sandbox_Settings::get_plugin_status();
 
 			/*
 				If the plugin is on, show the enabled badge

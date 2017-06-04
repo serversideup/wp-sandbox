@@ -23,23 +23,33 @@
 class WP_Sandbox_Activator {
 
 	/**
-	 * Short Description. (use period)
+	 * Handles plugin activation
 	 *
-	 * Long Description.
+	 * When the plugin activation is fired, we configure the database
+	 * and set the default settings.
 	 *
 	 * @since    1.0.0
 	 */
 	public static function activate() {
+		/*
+			Build the tables for the database management.
+		*/
 		$databaseManagement = new WP_Sandbox_Database_Management();
 		$databaseManagement->build_tables();
 
+		/*
+			Set the default settings for the plugin.
+		*/
 		$defaultSettings = new WP_Sandbox_Default_Settings();
 
+		/*
+			If the site is multisite set the default settings for 
+			multisite.
+		*/
 		if( is_multisite() ){
-			$defaultSettings->setDefaultSettingsMultisite();
+			$defaultSettings->set_default_settings_multisite();
 		}else{
-			$defaultSettings->setDefaultSettings();
+			$defaultSettings->set_default_settings();
 		}
-		
 	}
 }

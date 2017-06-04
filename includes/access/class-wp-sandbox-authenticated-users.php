@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Fired during plugin activation
+ * Handles the authenticated users in the plugin
  *
  * @link       https://521dimensions.com
  * @since      1.0.0
@@ -11,9 +11,10 @@
  */
 
 /**
- * Fired during plugin activation.
+ * Handles the authenticated users in the plugin
  *
- * This class defines all code necessary to run during the plugin's activation.
+ * This class handles all of the methods to determine the authenticated users
+ * in the plugin.
  *
  * @since      1.0.0
  * @package    WP_Sandbox
@@ -21,11 +22,13 @@
  * @author     521 Dimensions <dan@521dimensions.com>
  */
 class WP_Sandbox_Authenticated_Users{
-	/*------------------------------------------------
-		Gets all of the authenticated users from 
-		the database.
-	------------------------------------------------*/
-	public static function getAuthenticatedUsers(){
+	/**
+	 * Gets all of the authenticated users
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 */
+	public static function get_authenticated_users(){
 		global $wpdb;
 
 		/*
@@ -34,42 +37,71 @@ class WP_Sandbox_Authenticated_Users{
 			blog.
 		*/
 		if( is_multisite() ){
+			/*
+				Get the current blog ID and switch to that blog.
+			*/
 			$currentBlogID = get_current_blog_id();
 
 			global $switched;
 			switch_to_blog(1);
 
+			/*
+				Get all of the authenticated users
+			*/
 			$authenticatedUsers = $wpdb->get_results( $wpdb->prepare(
 				"SELECT * FROM ".$wpdb->prefix."wps_authenticated_users 
 				WHERE blog_id = '%d'",
 				$currentBlogID
 			), ARRAY_A );
 
+			/*
+				Restore the current blog.
+			*/
 			restore_current_blog();
 		}else{
+			/*
+				Gets all of the authenticated users.
+			*/
 			$authenticatedUsers = $wpdb->get_results( 
 				"SELECT * 
 				 FROM ".$wpdb->prefix."wps_authenticated_users",
 			ARRAY_A );
 		}
 
+		/*
+			Returns the authenticated users
+		*/
 		return $authenticatedUsers;
 	}
 
-	/*------------------------------------------------
-		Deletes an authenticated user from the
-		database.
-	------------------------------------------------*/
-	public static function deleteAuthenticatedUser( $authenticatedUserID ){
+	/**
+	 * Deletes an authenticated user
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 * @param 	 int 		$authenticatedUserID 	ID of the authenticated user being deleted.
+	 */
+	public static function delete_authenticated_user( $authenticatedUserID ){
 		global $wpdb;
 
+		/*
+			Checks if the site is multisite
+		*/
 		if( is_multisite() ){
+			/*
+				Gets the blog ID for the current blog.
+			*/
 			$currentBlogID = get_current_blog_id();
 			
+			/*
+				Switches to the top level blog
+			*/
 			global $switched;
-
 			switch_to_blog(1);
 
+			/*
+				Deletes the authenticated user from the blog.
+			*/
 			$wpdb->query( $wpdb->prepare( 
 				"DELETE FROM ".$wpdb->prefix."wps_authenticated_users
 				 WHERE id = '%d'
@@ -78,8 +110,14 @@ class WP_Sandbox_Authenticated_Users{
 				 $currentBlogID
 			) );
 
+			/*
+				Restores the current blog.
+			*/
 			restore_current_blog();
 		}else{
+			/*
+				Deletes the authenticated user from the blog.
+			*/
 			$wpdb->query( $wpdb->prepare( 
 				"DELETE FROM ".$wpdb->prefix."wps_authenticated_users
 				 WHERE id = '%d'",
@@ -88,10 +126,13 @@ class WP_Sandbox_Authenticated_Users{
 		}
 	}
 
-	/*------------------------------------------------
-		Gets an IP for a user to check to see
-		if the IP is authenticable.
-	------------------------------------------------*/
+	/**
+	 * Checks if an IP of a user is valid
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 * @param 	 string 		$ip 	IP Address being checked by the user.
+	 */
 	public static function check_valid_ip( $ip ){
 		global $wpdb;
 
@@ -100,11 +141,20 @@ class WP_Sandbox_Authenticated_Users{
 			against the current blog.
 		*/
 		if( is_multisite() ){
+			/*
+				Get the current blog ID
+			*/
 			$currentBlogID = get_current_blog_id();
 
+			/*
+				Switch to the top level blog.
+			*/
 			global $switched;
 			switch_to_blog(1);
 
+			/*
+				Get the IP Address from the top level blog.
+			*/
 			$ipAddress = $wpdb->get_results( $wpdb->prepare(
 				"SELECT *
 				 FROM ".$wpdb->prefix."wps_authenticated_users
@@ -114,8 +164,14 @@ class WP_Sandbox_Authenticated_Users{
 				 $currentBlogID
 			), ARRAY_A );
 
+			/*
+				Restore the current blog
+			*/
 			restore_current_blog();
 		}else{
+			/*
+				Get the IP address of the authenticated users.
+			*/
 			$ipAddress = $wpdb->get_results( $wpdb->prepare(
 				"SELECT *
 				 FROM ".$wpdb->prefix."wps_authenticated_users
@@ -135,10 +191,16 @@ class WP_Sandbox_Authenticated_Users{
 		}
 	}
 
-	/*------------------------------------------------
-		Adds an authenticated user
-	------------------------------------------------*/
-	public static function addAuthenticatedUser( $id, $ip, $expirationTime ){
+	/**
+	 * Adds an authenticated user
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 * @param 	 int 		$id 				ID of the authenticated user being added.
+	 * @param 	 string 	$ip 				IP Address being added for the authenticated user.
+	 * @param 	 string 	$expirationTime 	The time the authenticated user is valid for.
+	 */
+	public static function add_authenticated_user( $id, $ip, $expirationTime ){
 		global $wpdb;
 
 		/*
@@ -146,11 +208,20 @@ class WP_Sandbox_Authenticated_Users{
 			to the current blog.
 		*/
 		if( is_multisite() ){
+			/*
+				Get the current blog ID
+			*/
 			$currentBlogID = get_current_blog_id();
 
+			/*
+				Switch to the top level blog
+			*/
 			global $switched;
 			switch_to_blog(1);
 
+			/*
+				Add the authenticated user.
+			*/
 			$wpdb->query( $wpdb->prepare(
 				"INSERT INTO ".$wpdb->prefix."wps_authenticated_users
 				(blog_id, user_id, ip, expires)
@@ -160,8 +231,14 @@ class WP_Sandbox_Authenticated_Users{
 				$ip
 			) );
 
+			/*
+				Restore the current blog
+			*/
 			restore_current_blog();
 		}else{
+			/*
+				Add the authenticated user to the blog.
+			*/
 			$wpdb->query( $wpdb->prepare(
 				"INSERT INTO ".$wpdb->prefix."wps_authenticated_users
 				(user_id, ip, expires)
@@ -172,34 +249,58 @@ class WP_Sandbox_Authenticated_Users{
 		}
 	}
 
-	/*------------------------------------------------
-		Gets all authenticated users. This is only
-		called from a multisite instance so we know
-		it's multisite.
-	------------------------------------------------*/
-	public static function getNetworkAuthenticatedUsers(){
+	/**
+	 * Gets network authenticated users.
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 */
+	public static function get_network_authenticated_users(){
+		/*
+			Switch to the top level blog
+		*/
 		global $wpdb;
 		global $switched;
 
 		switch_to_blog(1);
 
+		/*
+			Get all users on the blog
+		*/
 		$authenticatedUsers = $wpdb->get_results(
 			"SELECT *
 			 FROM ".$wpdb->prefix."wps_authenticated_users",
 		ARRAY_A );
 
+		/*
+			Restore the current blog
+		*/
 		restore_current_blog();
 
+		/*
+			Return all of the authenticated users.
+		*/
 		return $authenticatedUsers;
 	}
 
+	/**
+	 * Saves a valid login for the authenticated user allowing them to
+	 * view the site not logged in.
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 */
 	public function save_valid_login(){
 		global $wpdb;
-		/*
-			Checks if plugin is enabled
-		*/
-		$pluginStatus =  WP_Sandbox_Settings::getPluginStatus();
 
+		/*
+			Gets the plugin status
+		*/
+		$pluginStatus =  WP_Sandbox_Settings::get_plugin_status();
+
+		/*
+			Ensures the plugin is enabled
+		*/
 		if( $pluginStatus == '1' ){
 			/*
 				Checks if the user is
@@ -207,6 +308,9 @@ class WP_Sandbox_Authenticated_Users{
 			*/
 			if( is_user_logged_in() ){
 
+				/*
+					Get the current user authenticated and their ID
+				*/
 				$current_user = wp_get_current_user();
 				
 				$userID = $current_user->data->ID;
@@ -226,11 +330,20 @@ class WP_Sandbox_Authenticated_Users{
 					&& !WP_Sandbox_IP_Range::check_valid_ip_range( $ip ) 
 					&& !WP_Sandbox_Subnet::check_valid_ip_subnet( $ip ) ){
 
-					$defaultExpirationTime = WP_Sandbox_Settings::getDefaultExpirationTime();
+					/*
+						Get the default expiration time set
+					*/
+					$defaultExpirationTime = WP_Sandbox_Settings::get_default_expiration_time();
 
-					$expirationTime = WP_Sandbox_Settings::getExpirationTime( $defaultExpirationTime );
+					/*
+						Get the expiration date for the user's login.
+					*/
+					$expirationTime = WP_Sandbox_Settings::get_expiration_time( $defaultExpirationTime );
 
-					self::addAuthenticatedUser( $userID, $ip, $expirationTime );
+					/*
+						Add the authenticated user.
+					*/
+					self::add_authenticated_user( $userID, $ip, $expirationTime );
 				}
 			}
 		}

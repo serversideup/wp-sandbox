@@ -1,19 +1,20 @@
 <?php
 
 /**
- * Fired during plugin deactivation
+ * Builds the tables for housing the access rules for WP Sandbox
  *
  * @link       https://521dimensions.com
  * @since      1.0.0
  *
- * @package    Wp_Sandbox
- * @subpackage Wp_Sandbox/includes
+ * @package    WP_Sandbox
+ * @subpackage WP_Sandbox/includes
  */
 
 /**
- * Fired during plugin deactivation.
+ * Builds the tables for housing the access rules for WP Sandbox
  *
- * This class defines all code necessary to run during the plugin's deactivation.
+ * When activating WP Sandbox, this class will run and build the tables.
+ * When deactivating WP Sandbox, the database tables will be deleted.
  *
  * @since      1.0.0
  * @package    WP_Sandbox
@@ -25,6 +26,7 @@ class WP_Sandbox_Database_Management {
 	 * Build the tables required for the plugin
 	 *
 	 * @since    1.0.0
+	 * @access 	 public
 	 */
 	public function build_tables() {
 		$this->build_authenticated_users_table();
@@ -34,14 +36,26 @@ class WP_Sandbox_Database_Management {
 		$this->build_subnets_table();
 	}
 
+	/**
+	 * Destroys the tables on deactivation
+	 *
+	 * @since    1.0.0
+	 * @access 	 public
+	 */
 	public function destroy_tables(){
 		global $wpdb;
 
+		/*
+			If multisite, switch to the top level blog
+		*/
 		if( is_multisite() ){
 			global $switched;
 			switch_to_blog(1);
 		}
 
+		/*
+			Drops all of the tables used by WP Sandbox
+		*/
 		$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'wps_authenticated_users' );
 		$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'wps_settings' );
 		$wpdb->query( 'DROP TABLE '.$wpdb->prefix.'wps_ips' );
@@ -54,21 +68,39 @@ class WP_Sandbox_Database_Management {
 		*/
 		delete_option( 'wp_sandbox_version' );
 
+		/*
+			Rstore the current blog on multisite.
+		*/
 		if( is_multisite() ){
 			restore_current_blog();
 		}
 	}
 
+	/**
+	 * Build the tables for Authenticated Users
+	 *
+	 * @since    1.0.0
+	 * @access 	 private
+	 */
 	private function build_authenticated_users_table(){
 		global $wpdb;
 		
+		/*
+			Switch to the top level blog from multisite.
+		*/
 		if( is_multisite() ){
 			global $switched;
 			switch_to_blog(1);
 		}
 
+		/*
+			Define the authenticated users table names
+		*/
 		$wpsLoginTableName = $wpdb->prefix."wps_authenticated_users";
 
+		/*
+			The script to build the authenticated users table.
+		*/
 		$wpsLoginTable = 'CREATE TABLE IF NOT EXISTS `'.$wpsLoginTableName.'` (
 		  `id` int(11) NOT NULL AUTO_INCREMENT,
 		  `blog_id` int(11) DEFAULT NULL,
@@ -79,23 +111,44 @@ class WP_Sandbox_Database_Management {
 		  PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1';
 		
+		/*
+			Run the query to build the authenticated users table.
+		*/
 		$wpdb->query( $wpsLoginTable );
 
+		/*
+			Restore current blog.
+		*/
 		if( is_multisite() ){
 			restore_current_blog();
 		}
 	}
 
+	/**
+	 * Build the settings table
+	 *
+	 * @since    1.0.0
+	 * @access 	 private
+	 */
 	private function build_settings_table(){
 		global $wpdb;
 		
+		/*
+			Switch to the top level blog from multisite.
+		*/
 		if( is_multisite() ){
 			global $switched;
 			switch_to_blog(1);
 		}
 
+		/*
+			Define the settings table name
+		*/
 		$wpsSettingsName = $wpdb->prefix."wps_settings";
 
+		/*
+			The script to build the settings table.
+		*/
 		$wpsSettingsTable = 'CREATE TABLE IF NOT EXISTS `'.$wpsSettingsName.'` (
 		  `id` int(11) NOT NULL AUTO_INCREMENT,
 		  `blog_id` int(11) DEFAULT NULL,
@@ -104,23 +157,44 @@ class WP_Sandbox_Database_Management {
 		  PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;';
 
+		/*
+			Run the query to build the settings table.
+		*/
 		$wpdb->query( $wpsSettingsTable );
 
+		/*
+			Restore current blog.
+		*/
 		if( is_multisite() ){
 			restore_current_blog();
 		}
 	}
 
+	/**
+	 * Build the IPs Table
+	 *
+	 * @since    1.0.0
+	 * @access 	 private
+	 */
 	private function build_ips_table(){
 		global $wpdb;
 		
+		/*
+			Switch to the top level blog from multisite.
+		*/
 		if( is_multisite() ){
 			global $switched;
 			switch_to_blog(1);
 		}
 
+		/*
+			Define the IP table names
+		*/
 		$wpsIPsName = $wpdb->prefix."wps_ips";
 
+		/*
+			The script to build the IPs table.
+		*/
 		$wpsIPsTable = 'CREATE TABLE IF NOT EXISTS `'.$wpsIPsName.'` (
 		  `id` int(11) NOT NULL AUTO_INCREMENT,
 		  `blog_id` int(11) DEFAULT NULL,
@@ -130,23 +204,44 @@ class WP_Sandbox_Database_Management {
 		  PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;';
 
+		/*
+			Run the query to build the authenticated users table.
+		*/
 		$wpdb->query( $wpsIPsTable );
 
+		/*
+			Restore current blog.
+		*/
 		if( is_multisite() ){
 			restore_current_blog();
 		}
 	}
 
+	/**
+	 * Build the IP Ranges Table
+	 *
+	 * @since    1.0.0
+	 * @access 	 private
+	 */
 	private function build_ip_ranges_table(){
 		global $wpdb;
 		
+		/*
+			Switch to the top level blog from multisite.
+		*/
 		if( is_multisite() ){
 			global $switched;
 			switch_to_blog(1);
 		}
 
+		/*
+			Define the IP Ranges Table
+		*/
 		$wpsIPRangeName = $wpdb->prefix."wps_ip_ranges";
 
+		/*
+			The script to build the IP Ranges table.
+		*/
 		$wpsIPRangeTable = 'CREATE TABLE IF NOT EXISTS `'.$wpsIPRangeName.'` (
 		  `id` int(11) NOT NULL AUTO_INCREMENT,
 		  `blog_id` int(11) DEFAULT NULL,
@@ -157,23 +252,44 @@ class WP_Sandbox_Database_Management {
 		  PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 
+		/*
+			Run the query to build the IP Ranges table
+		*/
 		$wpdb->query( $wpsIPRangeTable );
 
+		/*
+			Restore current blog.
+		*/
 		if( is_multisite() ){
 			restore_current_blog();
 		}
 	}
 
+	/**
+	 * Build the tables for Subnets Table
+	 *
+	 * @since    1.0.0
+	 * @access 	 private
+	 */
 	private function build_subnets_table(){
 		global $wpdb;
 		
+		/*
+			Switch to the top level blog from multisite.
+		*/
 		if( is_multisite() ){
 			global $switched;
 			switch_to_blog(1);
 		}
 
+		/*
+			Define the subnets table names
+		*/
 		$wpsSubnetName = $wpdb->prefix."wps_subnets";
 
+		/*
+			The script to build the subnet table.
+		*/
 		$wpsSubnetTable = 'CREATE TABLE IF NOT EXISTS `'.$wpsSubnetName.'` (
 		  `id` int(11) NOT NULL AUTO_INCREMENT,
 		  `blog_id` int(11) DEFAULT NULL,
@@ -184,8 +300,14 @@ class WP_Sandbox_Database_Management {
 		  PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8;';
 
+		/*
+			Run the query to build the subnets table.
+		*/
 		$wpdb->query( $wpsSubnetTable );
 
+		/*
+			Restore current blog.
+		*/
 		if( is_multisite() ){
 			restore_current_blog();
 		}

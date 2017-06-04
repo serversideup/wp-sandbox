@@ -1,10 +1,30 @@
 <?php
+	/**
+	 * Handles the default settings for the plugin
+	 *
+	 * @link       https://521dimensions.com
+	 * @since      1.0.0
+	 *
+	 * @package    WP_Sandbox
+	 * @subpackage WP_Sandbox/includes
+	 */
+
+	/**
+	 * Configures the default settings for all of the plugin
+	 *
+	 * @since      1.0.0
+	 * @package    WP_Sandbox
+	 * @subpackage WP_Sandbox/includes
+	 * @author     521 Dimensions <dan@521dimensions.com>
+	 */
 	class WP_Sandbox_Default_Settings{
-		/*------------------------------------------------
-			Sets the default settings for a single
-			site instance.
-		------------------------------------------------*/
-		public function setDefaultSettings(){
+		/**
+		 * Sets the default settings for a single site instance.
+		 *
+		 * @since      1.0.0
+		 * @access     public
+		 */
+		public function set_default_settings(){
 			global $wpdb;
 
 			/*
@@ -17,6 +37,9 @@
 				 ARRAY_A
 			);
 
+			/*
+				If the default page is empty, insert the default.
+			*/
 			if( empty( $checkDefaultWPSPage ) ){
 				$wpdb->query(
 					"INSERT INTO ".$wpdb->prefix."wps_settings 
@@ -36,6 +59,10 @@
 				 ARRAY_A
 			);
 
+			/*
+				If the default expiration time is empty, add the
+				default expiration time.
+			*/
 			if( empty( $checkDefaultWPSExpire ) ){
 				$wpdb->query(
 					"INSERT INTO ".$wpdb->prefix."wps_settings 
@@ -55,8 +82,12 @@
 				 ARRAY_A
 			);
 
+			/*
+				If the default hash is empty, add a preview
+				hash
+			*/
 			if( empty( $checkDefaultWPSHash ) ){
-				$hash = WP_Sandbox_Preview_URL::generatePreviewHash();
+				$hash = WP_Sandbox_Preview_URL::generate_preview_hash();
 
 				$wpdb->query( $wpdb->prepare(
 					"INSERT INTO ".$wpdb->prefix."wps_settings 
@@ -77,6 +108,10 @@
 				 ARRAY_A 
 			);
 
+			/*
+				If the plugin enabled is empty, add the default plugin enabled
+				setting.
+			*/
 			if( empty( $checkEnabled ) ){
 				$wpdb->query(
 					"INSERT INTO ".$wpdb->prefix."wps_settings 
@@ -86,11 +121,13 @@
 			}
 		}
 
-		/*------------------------------------------------
-			Sets the default settings for a multisite
-			site install.
-		------------------------------------------------*/
-		public function setDefaultSettingsMultisite(){
+		/**
+		 * Sets the default settings for a multi site instance.
+		 *
+		 * @since      1.0.0
+		 * @access     public
+		 */
+		public function set_default_settings_multisite(){
 			global $wpdb;
 			$previewURL = new WP_Sandbox_Preview_URL();
 
@@ -107,17 +144,31 @@
 			$blogList = array();
 
 			if( function_exists('get_blog_list') ){
+				/*
+					Get all of the blogs
+				*/
 				$blogReturn = get_blog_list( 0, 'all' );
 				$blogCounter = 0;
 
-				foreach ( $blogReturn AS $blog ) {
+				/*
+					Get an entire list of blogs and add the blog ID
+					to a blog list array.
+				*/
+				foreach( $blogReturn as $blog ){
 					$blogList[ $blogCounter ] = $blog['blog_id'];
 					$blogCounter++;
 				}
 			}else{
+				/*
+					Get all of the sites
+				*/
 				$blogReturn = wp_get_sites();
 				$blogCounter = 0;
 
+				/*
+					Get the entire list of blogs and add the blog ID
+					to a blog list array.
+				*/
 				foreach ( $blogReturn AS $blog ) {
 					$blogList[ $blogCounter ] = $blog['blog_id'];
 					$blogCounter++;
@@ -146,6 +197,10 @@
 					 $blogID
 				), ARRAY_A );
 
+				/*
+					If the default page is not set on the blog, add
+					add a default setting.
+				*/
 				if( empty( $checkDefaultWPSPage ) ){
 					$wpdb->query( $wpdb->prepare(
 						"INSERT INTO ".$wpdb->prefix."wps_settings 
@@ -167,6 +222,10 @@
 					 $blogID
 				), ARRAY_A );
 
+				/*
+					If the default expire is not set on the blog, add a default
+					expire setting.
+				*/
 				if( empty( $checkDefaultWPSExpire ) ){
 					$wpdb->query( $wpdb->prepare(
 						"INSERT INTO ".$wpdb->prefix."wps_settings 
@@ -188,8 +247,13 @@
 					 $blogID
 				), ARRAY_A );
 
+				/*
+					Checks to see if a default preview hash is not set
+					generate one and add a default preview hash to for the
+					site.
+				*/
 				if( empty( $checkDefaultWPSHash ) ){
-					$hash = WP_Sandbox_Preview_URL::generatePreviewHash();
+					$hash = WP_Sandbox_Preview_URL::generate_preview_hash();
 
 					$wpdb->query( $wpdb->prepare(
 						"INSERT INTO ".$wpdb->prefix."wps_settings 
@@ -204,7 +268,6 @@
 					Adds a default setting for the status of the plugin and defaults
 					it to 0 which means disabled.
 				*/
-
 				$checkEnabled = $wpdb->get_results( $wpdb->prepare(
 					"SELECT setting_value 
 					 FROM ".$wpdb->prefix."wps_settings 
@@ -213,6 +276,10 @@
 					 $blogID
 				), ARRAY_A );
 
+				/*
+					Checks to see if the default blog enabled is set, if not
+					then add the default enabled setting for the blog.
+				*/
 				if( empty( $checkEnabled ) ){
 					$wpdb->query( $wpdb->prepare(
 						"INSERT INTO ".$wpdb->prefix."wps_settings 
@@ -226,10 +293,13 @@
 			restore_current_blog();
 		}
 
-		/*------------------------------------------------
-			The handler that adds all of the default
-			settings for a new blog.
-		------------------------------------------------*/
+		/**
+		 * When a new blog is added, ensure we add the default settings
+		 * for the new blog
+		 *
+		 * @since      1.0.0
+		 * @access     public
+		 */
 		public static function add_new_blog(){
 			global $wpdb;
 
@@ -270,7 +340,7 @@
 			/*
 				Generates and adds preview hash setting
 			*/
-			$hash = WP_Sandbox_Preview_URL::generatePreviewHash();
+			$hash = WP_Sandbox_Preview_URL::generate_preview_hash();
 			
 			$wpdb->query( $wpdb->prepare(
 				"INSERT INTO ".$wpdb->prefix."wps_settings 
@@ -293,10 +363,13 @@
 			restore_current_blog();
 		}
 
-		/*------------------------------------------------
-			The handler that removes all of the default
-			settings for a deleted blog.
-		------------------------------------------------*/
+		/**
+		 * When a blog is deleted, ensure the settings are deleted
+		 * as well.
+		 *
+		 * @since      1.0.0
+		 * @access     public
+		 */
 		public static function delete_blog(){
 			global $wpdb;
 			global $switched;
@@ -354,7 +427,7 @@
 				 WHERE blog_id = '%d'",
 				 $blogID
 			) );
-
+			
 			restore_current_blog();
 		}
 	}

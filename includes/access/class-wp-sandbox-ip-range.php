@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Fired during plugin activation
+ * Handles the CRUD for IP Ranges
  *
  * @link       https://521dimensions.com
  * @since      1.0.0
@@ -11,9 +11,10 @@
  */
 
 /**
- * Fired during plugin activation.
+ * Handles the CRUD for IP Ranges
  *
- * This class defines all code necessary to run during the plugin's activation.
+ * All CRUD methods for IP Ranges are in this class including checking if an
+ * IP is in a valid range.
  *
  * @since      1.0.0
  * @package    WP_Sandbox
@@ -21,12 +22,25 @@
  * @author     521 Dimensions <dan@521dimensions.com>
  */
 class WP_Sandbox_IP_Range{
-	public static function getIPRanges(){
+	/**
+	 * Gets all of the IP Ranges in the app.
+	 *
+	 * @since      1.0.0
+	 * @access     public
+	 */
+	public static function get_ip_ranges(){
 		global $wpdb;
 
+		/*
+			If the site install is multi site, we get the
+			IP ranges for the specific site.
+		*/
 		if( is_multisite() ){
 			$currentBlogID = get_current_blog_id();
 
+			/*
+				Switch to the top level blog to query the table.
+			*/
 			global $switched;
 			switch_to_blog(1);
 
@@ -51,7 +65,17 @@ class WP_Sandbox_IP_Range{
 		return $ranges;
 	}
 
-	public static function addRange( $startIP, $endIP, $expiration, $userID ){
+	/**
+	 * Adds an IP Range
+	 *
+	 * @since      1.0.0
+	 * @access     public
+	 * @var 	   string 		$startIP 		The beginning of the IP Range
+	 * @var 	   string 		$endIP 			The end of the IP Range
+	 * @var 	   string 		$expiration		The time the IP Range expires
+	 * @var 	   int 			$userID 		The ID of the user adding the range.
+	 */
+	public static function add_range( $startIP, $endIP, $expiration, $userID ){
 		global $wpdb;
 
 		/*
@@ -104,30 +128,64 @@ class WP_Sandbox_IP_Range{
 		return $rangeID;
 	}
 
-	public static function deleteRange( $rangeID ){
+	/**
+	 * Deletes an IP range
+	 *
+	 * @since      1.0.0
+	 * @access     public
+	 * @var 	   int			$rangeID 		The ID of the range being deleted
+	 */
+	public static function delete_range( $rangeID ){
 		global $wpdb;
 		
-		global $switched;
-		switch_to_blog(1);
+		/*
+			If multisite, we switch to the top level blog
+		*/
+		if( is_multisite() ){
+			global $switched;
+			switch_to_blog(1);
 
-		$wpdb->query( $wpdb->prepare(
-			"DELETE FROM ".$wpdb->prefix."wps_ip_ranges
-			WHERE id = '%d'",
-			$rangeID
-		) );
+			/*
+				Deletes the IP Range by ID
+			*/
+			$wpdb->query( $wpdb->prepare(
+				"DELETE FROM ".$wpdb->prefix."wps_ip_ranges
+				WHERE id = '%d'",
+				$rangeID
+			) );
 
-		restore_current_blog();
+			restore_current_blog();
+		}else{
+			/*
+				Deletes the IP Range by ID
+			*/
+			$wpdb->query( $wpdb->prepare(
+				"DELETE FROM ".$wpdb->prefix."wps_ip_ranges
+				WHERE id = '%d'",
+				$rangeID
+			) );
+		}
 	}
 
-	/*------------------------------------------------
-		Checks to see if the IP address is in a valid range of IPs.
-		Help from: http://stackoverflow.com/questions/18336908/php-check-if-ip-address-is-in-a-range-of-ip-addresses
-	------------------------------------------------*/
+	/**
+	 * Checks to see if the IP address is in a valid range of IPs.
+	 * Help from: http://stackoverflow.com/questions/18336908/php-check-if-ip-address-is-in-a-range-of-ip-addresses
+	 * 
+	 * @since      1.0.0
+	 * @access     public
+	 * @var 	   int			$rangeID 		The ID of the range being deleted
+	 */
 	public static function check_valid_ip_range( $ipAddress ){
 		global $wpdb;
 
+		/*
+			Checks to see if the site is multisite
+		*/
 		if( is_multisite() ){
 
+			/*
+				Gets the current blog ID.
+			*/
 			$currentBlogID = get_current_blog_id();
 
 			global $switched;
@@ -157,11 +215,14 @@ class WP_Sandbox_IP_Range{
 			to see if the ip address is within
 			range.
 		*/
-		foreach($ipRanges as $ipRange){
+		foreach( $ipRanges as $ipRange ){
 	        $min    = ip2long($ipRange['start_ip']);
     		$max    = ip2long($ipRange['end_ip']);
     		$needle = ip2long($ipAddress);  
 
+    		/*
+				If the IP is in a range, then return true.
+    		*/
     		if( ( $needle >= $min ) AND ( $needle <= $max ) ){
     			return true;
     		}
@@ -173,24 +234,38 @@ class WP_Sandbox_IP_Range{
 		return false;
 	}
 
-	/*------------------------------------------------
-		Gets all network authenticated ips. This 
-		is only called from a multisite instance so 
-		we know it's multisite.
-	------------------------------------------------*/
-	public static function getNetworkAuthenticatedIPRanges(){
+	/**
+	 * Gets all network authenticated ips. This is only called from a 
+	 * multisite instance so we know it's multisite.
+	 * 
+	 * @since      1.0.0
+	 * @access     public
+	 */
+	public static function get_network_authenticated_ip_ranges(){
 		global $wpdb;
 		global $switched;
 
+		/*
+			Switch to the top level blog.
+		*/
 		switch_to_blog(1);
 
+		/*
+			Get all of the IP Ranges
+		*/
 		$authenticatedIPRanges = $wpdb->get_results(
 			"SELECT *
 			 FROM ".$wpdb->prefix."wps_ip_ranges",
 		ARRAY_A );
 
+		/*
+			Restore the current blog
+		*/
 		restore_current_blog();
 
+		/*
+			Return all of the authenticated IP Ranges
+		*/
 		return $authenticatedIPRanges;
 	}
 }

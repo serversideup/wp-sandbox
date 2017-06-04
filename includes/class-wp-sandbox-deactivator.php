@@ -23,9 +23,9 @@
 class WP_Sandbox_Deactivator {
 
 	/**
-	 * Short Description. (use period)
+	 * Runs the deactivation scripts on deactivation
 	 *
-	 * Long Description.
+	 * Destroys all of the tables for WP Sandbox when the plugin is deactivated.
 	 *
 	 * @since    1.0.0
 	 */

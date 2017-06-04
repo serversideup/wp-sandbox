@@ -2,146 +2,149 @@
 
 <br>Version: <?php echo $version; ?><br>
 
-/* Start sites enabled/disabled banner */
-echo '<div id="wps-settings-saved" class="updated">';
-	echo 'WP Sandbox changes saved';
-echo '</div>';
-/* End sites enabled/disabled banner */
 
-/* Begin Enabled Sites Panel */
-echo '<div class="wrap">';
-	echo '<div class="wps-panel">';
-		echo '<h3>Enabled Sites</h3>';
-		echo '<hr>';
+<div id="wps-settings-saved" class="updated">
+	WP Sandbox changes saved
+</div>
 
-		/* Begin Enabled Sites Table */
-		echo '<table class="wps-table" id="wps-enabled-sites-table">';
-			echo '<thead>';
-				echo '<tr>';
-					echo '<td><input type="checkbox" id="wps-toggle-select-deselect-all"/> Enabled</td>';
-					echo '<td>Site Name</td>';
-					echo '<td>Site URL</td>';
-				echo '</tr>';
-			echo '</thead>';
-			echo '<tbody>';
+<div class="wrap">
+	<div class="wps-panel">
+		<h3>Enabled Sites</h3>
+		<hr>
+
+		<table class="wps-table" id="wps-enabled-sites-table">
+			<thead>
+				<tr>
+					<td><input type="checkbox" id="wps-toggle-select-deselect-all"/> Enabled</td>
+					<td>Site Name</td>
+					<td>Site URL</td>
+				</tr>
+			</thead>
+			<tbody>
+			<?php
 				foreach( $sites as $site ){
 					$blogInfo = get_blog_details( $site['blog_id'] );
-					echo '<tr>';
+			?>
+					<tr>
+					<?php
 						if( $site['setting_value'] == 1 ){
-							echo '<td>';
-								echo '<input type="checkbox" class="wps-network-enable-checkbox" value="'.$site['blog_id'].'" checked="checked">';
-							echo '</td>';
+					?>
+							<td>
+								<input type="checkbox" class="wps-network-enable-checkbox" value="<?php echo $site['blog_id']; ?>" checked="checked">
+							</td>
+					<?php
 						}else{
-							echo '<td>';
-								echo '<input type="checkbox" class="wps-network-enable-checkbox" value="'.$site['blog_id'].'">';
-							echo '</td>';
+					?>
+							<td>
+								<input type="checkbox" class="wps-network-enable-checkbox" value="<?php echo $site['blog_id']; ?>">
+							</td>
+					<?php
 						}
-						echo '<td>';
-							echo $blogInfo->blogname;
-						echo '</td>';
-						echo '<td>';
-							echo $blogInfo->siteurl;
-						echo '</td>';
-					echo '</tr>';
+					?>
+						<td>
+							<?php echo $blogInfo->blogname; ?>
+						</td>
+						<td>
+							<?php echo $blogInfo->siteurl; ?>
+						</td>
+					</tr>
+			<?php
 				}
-			echo '</tbody>';
-		echo '</table>';
-		/* End Enabled Sites Table */
+			?>
+			</tbody>
+		</table>
 
-		echo '<br>';
+		<br>
 
-		echo '<button id="wps-network-enable-sites-save" class="button button-primary">Save Changes</button>';
-	echo '</div>';
-echo '</div>';
-/* End Enabled Sites Panel */
+		<button id="wps-network-enable-sites-save" class="button button-primary">Save Changes</button>
+	</div>
+</div>
 
-/* Begin Network Access Panel */
-echo '<div class="wrap">';
-	echo '<div class="wps-panel">';
-		echo '<h3>Network Access</h3>';
-		echo '<hr>';
+<div class="wrap">
+	<div class="wps-panel">
+		<h3>Network Access</h3>
+		<hr>
 
-		/* Begin Network Access Table */
-		echo '<table class="wps-table" id="wps-network-access-table">';
-			echo '<thead>';
-				echo '<tr>';
-					echo '<td>Type</td>';
-					echo '<td>Site</td>';
-					echo '<td>Network/IPs</td>';
-					echo '<td>Added By</td>';
-					echo '<td>Expires</td>';
-					echo '<td></td>';
-				echo '</tr>';
-			echo '</thead>';
-			echo '<tbody>';
-				/*
-					Authenticated Users
-				*/
+		<table class="wps-table" id="wps-network-access-table">
+			<thead>
+				<tr>
+					<td>Type</td>
+					<td>Site</td>
+					<td>Network/IPs</td>
+					<td>Added By</td>
+					<td>Expires</td>
+					<td></td>
+				</tr>
+			</thead>
+			<tbody>
+			<?php
 				foreach( $authenticatedUsers as $authenticatedUser ){
 					$user = get_userdata( $authenticatedUser['user_id'] );
 					$blogInfo = get_blog_details( $authenticatedUser['blog_id'] );
-
-					echo '<tr id="user-'.$authenticatedUser['id'].'">';
-						echo '<td>User ('.$user->user_login.')</td>';
-						echo '<td>'.$blogInfo->blogname.'</td>';
-						echo '<td>'.$authenticatedUser['ip'].'</td>';
-						echo '<td>-</td>';
-						echo '<td>'.( $authenticatedUser['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $authenticatedUser['expires'] ) ) ).'</td>';
-						echo '<td><a class="wps-remove-access" data-attr-type="user" data-attr-id="'.$authenticatedUser['id'].'">Remove Access</a></td>';
-					echo '</tr>';
+			?>
+					<tr id="user-<?php echo $authenticatedUser['id']; ?>">
+						<td>User (<?php echo $user->user_login; ?>)</td>
+						<td><?php echo $blogInfo->blogname; ?></td>
+						<td><?php echo $authenticatedUser['ip']; ?></td>
+						<td>-</td>
+						<td><?php echo ( $authenticatedUser['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $authenticatedUser['expires'] ) ) ); ?></td>
+						<td><a class="wps-remove-access" data-attr-type="user" data-attr-id="<?php echo $authenticatedUser['id']; ?>">Remove Access</a></td>
+					</tr>
+			<?php
 				} 
-				/*
-					IPs
-				*/
+			?>
+
+			<?php
 				foreach( $ips as $ip ){
 					$user = get_userdata( $ip['added_by'] );
 					$blogInfo = get_blog_details( $ip['blog_id'] );
-
-					echo '<tr id="single-'.$ip['id'].'">';
-						echo '<td>Single IP</td>';
-						echo '<td>'.$blogInfo->blogname.'</td>';
-						echo '<td>'.$ip['ip'].'</td>';
-						echo '<td>'.$user->user_login.'</td>';
-						echo '<td>'.( $ip['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $ip['expires'] ) ) ).'</td>';
-						echo '<td><a class="wps-remove-access" data-attr-type="single" data-attr-id="'.$ip['id'].'">Remove Access</a></td>';
-					echo '</tr>';
+			?>
+					<tr id="single-'.$ip['id'].'">
+						<td>Single IP</td>
+						<td><?php echo $blogInfo->blogname; ?></td>
+						<td><?php echo $ip['ip']; ?></td>
+						<td><?php echo $user->user_login; ?></td>
+						<td><?php echo ( $ip['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $ip['expires'] ) ) ); ?></td>
+						<td><a class="wps-remove-access" data-attr-type="single" data-attr-id="<?php echo $ip['id']; ?>">Remove Access</a></td>
+					</tr>';
+			<?php
 				}
-				/*
-					IP Range
-				*/
+			?>
+
+			<?php
 				foreach( $ipRanges as $ipRange ){
 					$user = get_userdata( $ipRange['added_by'] );
 					$blogInfo = get_blog_details( $ip['blog_id'] );
-
-					echo '<tr id="range-'.$ipRange['id'].'">';
-						echo '<td>IP Range</td>';
-						echo '<td>'.$blogInfo->blogname.'</td>';
-						echo '<td>'.$ipRange['start_ip'].'-'.$ipRange['end_ip'].'</td>';
-						echo '<td>'.$user->user_login.'</td>';
-						echo '<td>'.( $ipRange['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $ipRange['expires'] ) ) ).'</td>';
-						echo '<td><a class="wps-remove-access" data-attr-type="range" data-attr-id="'.$ipRange['id'].'">Remove Access</a></td>';
-					echo '</tr>';
+			?>
+					<tr id="range-<?php echo $ipRange['id']; ?>">
+						<td>IP Range</td>
+						<td><?php echo $blogInfo->blogname; ?></td>
+						<td><?php echo $ipRange['start_ip'].'-'.$ipRange['end_ip']; ?></td>
+						<td><?php echo $user->user_login; ?></td>
+						<td><?php echo ( $ipRange['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $ipRange['expires'] ) ) ); ?></td>
+						<td><a class="wps-remove-access" data-attr-type="range" data-attr-id="<?php echo $ipRange['id']; ?>">Remove Access</a></td>
+					</tr>
+			<?php
 				}
+			?>
 
-				/*
-					Networks
-				*/
+			<?php
 				foreach( $subnets as $subnet ){
 					$user = get_userdata( $subnet['added_by'] );
 					$blogInfo = get_blog_details( $ip['blog_id'] );
-
-					echo '<tr id="subnet-'.$subnet['id'].'">';
-						echo '<td>Network</td>';
-						echo '<td>'.$blogInfo->blogname.'</td>';
-						echo '<td>'.$subnet['start_ip'].'/'.$subnet['subnet'].'</td>';
-						echo '<td>'.$user->user_login.'</td>';
-						echo '<td>'.( $subnet['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $subnet['expires'] ) ) ).'</td>';
-						echo '<td><a class="wps-remove-access" data-attr-type="subnet" data-attr-id="'.$subnet['id'].'">Remove Access</a></td>';
-					echo '</tr>';
+			?>
+					<tr id="subnet-'.$subnet['id'].'">';
+						<td>Network</td>
+						<td><?php echo $blogInfo->blogname; ?></td>
+						<td><?php echo $subnet['start_ip'].'/'.$subnet['subnet']; ?></td>
+						<td><?php echo $user->user_login; ?></td>
+						<td><?php echo ( $subnet['expires'] == '0000-00-00 00:00:00' ? 'never' : date('m-d-Y H:i:s', strtotime( $subnet['expires'] ) ) ); ?></td>
+						<td><a class="wps-remove-access" data-attr-type="subnet" data-attr-id="<?php echo $subnet['id']; ?>">Remove Access</a></td>
+					</tr>
+			<?php
 				}
-			echo '</tbody>';
-		echo '</table>';
-		/* End Network Access Table */
-	echo '</div>';
-echo '</div>';
-/* End Network Access Panel */
+			?>
+			</tbody>
+		</table>
+	</div>
+</div>

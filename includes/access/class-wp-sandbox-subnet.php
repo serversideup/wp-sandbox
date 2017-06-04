@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Fired during plugin activation
+ * Handles the CRUD for Subnets
  *
  * @link       https://521dimensions.com
  * @since      1.0.0
@@ -11,9 +11,10 @@
  */
 
 /**
- * Fired during plugin activation.
+ * Handles the CRUD for Subnets
  *
- * This class defines all code necessary to run during the plugin's activation.
+ * All CRUD methods for Subnets are in this class including checking if an
+ * Subnets is in a valid range.
  *
  * @since      1.0.0
  * @package    WP_Sandbox
@@ -21,15 +22,25 @@
  * @author     521 Dimensions <dan@521dimensions.com>
  */
 class WP_Sandbox_Subnet{
-	/*------------------------------------------------
-		Retrieves all current subnets
-	------------------------------------------------*/
-	public static function getSubnets(){
+	/**
+	 * Retrieves all current subnets
+	 *
+	 * @since      1.0.0
+	 * @access     public
+	 */
+	public static function get_subnets(){
 		global $wpdb;
 
+		/*
+			If the site install is multi site, we get the
+			Subnets for the specific site.
+		*/
 		if( is_multisite() ){
 			$currentBlogID = get_current_blog_id();
 
+			/*
+				Switch to the top level blog to query the table.
+			*/
 			global $switched;
 			switch_to_blog(1);
 
@@ -54,12 +65,23 @@ class WP_Sandbox_Subnet{
 		return $subnets;
 	}
 
-	/*------------------------------------------------
-		Adds a subnet
-	------------------------------------------------*/
-	public static function addSubnet( $ip, $network, $expiration, $userID ){
+	/**
+	 * Adds a Subnet
+	 *
+	 * @since      1.0.0
+	 * @access     public
+	 * @var 	   string 		$startIP 		The beginning IP of the network
+	 * @var 	   string 		$network		The network being added
+	 * @var 	   string 		$expiration 	The time the rule expires
+	 * @var 	   int 			$userID 		The ID of the user adding the range.
+	 */
+	public static function add_subnet( $ip, $network, $expiration, $userID ){
 		global $wpdb;
 
+		/*
+			Checks if it's multisite and grabs
+			the blog ID if needed.
+		*/
 		if( is_multisite() ){
 			$currentBlogID = get_current_blog_id();
 
@@ -67,7 +89,7 @@ class WP_Sandbox_Subnet{
 			switch_to_blog(1);
 
 			/*
-				Clenses and adds the IP
+				Clenses and adds the IP Network
 				to the database.
 			*/
 			$wpdb->query( $wpdb->prepare(
@@ -80,12 +102,18 @@ class WP_Sandbox_Subnet{
 				$network
 			) );
 
-			$rangeID = $wpdb->insert_id;
+			/*
+				Gets the ID of the subnet
+			*/
+			$subnetID = $wpdb->insert_id;
 
+			/*
+				Restores the current blog
+			*/
 			restore_current_blog();
 		}else{
 			/*
-				Clenses and adds the IP
+				Clenses and adds the IP Network
 				to the database.
 			*/
 			$wpdb->query( $wpdb->prepare(
@@ -97,50 +125,83 @@ class WP_Sandbox_Subnet{
 				$network
 			) );
 
-			$rangeID = $wpdb->insert_id;
+			/*
+				Gets the ID of the subnet
+			*/
+			$subnetID = $wpdb->insert_id;
 		}
 
 		/*
-			Returns the newly added ID.
+			Returns the newly added Subnet.
 		*/
-		return $rangeID;
+		return $subnetID;
 	}
 
-	/*------------------------------------------------
-		Deletes a subnet
-	------------------------------------------------*/
-	public static function deleteSubnet( $subnetID ){
+	/**
+	 * Deletes a subnet
+	 *
+	 * @since      1.0.0
+	 * @access     public
+	 * @var 	   int			$subnetID 		The ID of the subnet being deleted
+	 */
+	public static function delete_subnet( $subnetID ){
 		global $wpdb;
 
-		global $switched;
-		switch_to_blog(1);
-		
-		$wpdb->query( $wpdb->prepare(
-			"DELETE FROM ".$wpdb->prefix."wps_subnets
-			WHERE id = '%d'",
-			$subnetID
-		) );
+		/*
+			If multisite, we switch to the top level blog.
+		*/
+		if( is_multisite() ){
+			global $switched;
+			switch_to_blog(1);
+			
+			/*
+				Delets the Subnet by ID
+			*/
+			$wpdb->query( $wpdb->prepare(
+				"DELETE FROM ".$wpdb->prefix."wps_subnets
+				WHERE id = '%d'",
+				$subnetID
+			) );
 
-		restore_current_blog();
+			restore_current_blog();
+		}else{
+			/*
+				Delets the Subnet by ID
+			*/
+			$wpdb->query( $wpdb->prepare(
+				"DELETE FROM ".$wpdb->prefix."wps_subnets
+				WHERE id = '%d'",
+				$subnetID
+			) );
+		}
 	}
 
-	/*------------------------------------------------
-		Checks to see if an IP is in an allowed
-		subnet
-	------------------------------------------------*/
+	/**
+	 * Checks to see if an IP is in an allowed subnet
+	 *
+	 * @since      1.0.0
+	 * @access     public
+	 * @var 	   int			$ipAddress 		The ip address being tested.
+	 */
 	public static function check_valid_ip_subnet( $ipAddress ){
 		global $wpdb;
 
 		/*
-			Grabs allowed subnets from the 
-			current blog.
+			Checks if the site is multisite.
 		*/
 		if( is_multisite() ){
+			/*
+				Gets the current blog ID
+			*/
 			$currentBlogID = get_current_blog_id();
 
 			global $switched;
 			switch_to_blog(1);
 
+			/*
+				Grabs allowed subnets from the 
+				current blog.
+			*/
 			$subnets = $wpdb->get_results( $wpdb->prepare(
 				"SELECT *
 				 FROM ".$wpdb->prefix."wps_subnets
@@ -148,8 +209,14 @@ class WP_Sandbox_Subnet{
 				 $currentBlogID
 			), ARRAY_A );
 
+			/*
+				Restores the current blog
+			*/
 			restore_current_blog();
 		}else{
+			/*
+				Gets all of the subnets
+			*/
 			$subnets = $wpdb->get_results( "SELECT * FROM ".$wpdb->prefix."wps_subnets", ARRAY_A );
 		}
 
@@ -158,13 +225,22 @@ class WP_Sandbox_Subnet{
 			if the IP address is within the range.
 		*/
 		foreach( $subnets as $subnet ){
+			/*
+				Divides into subnet parts
+			*/
 			$subnetParts 	= explode( '.', $subnet['start_ip'] );
 
+			/*
+				Define octets 1 - 4
+			*/
 			$firstOctet 	= $subnetParts[0];
 			$secondOctet 	= $subnetParts[1];
 			$thirdOctet 	= $subnetParts[2];
 			$fourthOctet 	= $subnetParts[3];
 
+			/*
+				Initialize new octets
+			*/
 			$newFirstOctet 	= '';
 			$newSecondOctet	= '';
 			$newThirdOctet 	= '';
@@ -181,14 +257,23 @@ class WP_Sandbox_Subnet{
 					$newFirstOctet = $firstOctet + $subnet['subnet'];
 				}
 
+				/*
+					Get the integer values for the subnet
+				*/
 				$min 	= ip2long( $subnet['start_ip'] );
 				$max 	= ip2long( $newFirstOctet.'.255.255.254' );
 				$needle = ip2long( $ipAddress );
 
+				/*
+					Returns true if the IP is in a range.
+				*/
 				if( ( $needle >= $min ) AND ( $needle <= $max ) ){
 					return true;
 				}
 			}else if( ( $subnet['subnet'] > 8 ) && ( $subnet['subnet'] <= 16 ) ){
+				/*
+					Check the second Octet
+				*/
 				if( ( $secondOctet + $subnet['subnet'] ) > 255 ){
 					$newScondOctet = ( $secondOctet + $subnet['subnet'] ) - 255;
 					$newFirstOctet = $firstOctet + 1;
@@ -197,14 +282,23 @@ class WP_Sandbox_Subnet{
 					$newSecondOctet = $secondOctet + $subnet['subnet'];
 				}
 
+				/*
+					Get the integer values for the subnet
+				*/
 				$min    = ip2long( $subnet['start_ip'] );
 				$max    = ip2long( $newFirstOctet.'.255.255.254' );
 				$needle = ip2long( $ipAddress );  
 
+				/*
+					Returns true if the IP is in a range.
+				*/
 				if( ( $needle >= $min ) AND ( $needle <= $max ) ){
 					return true;
 				}
 			}else if( ( $subnet['subnet'] > 16 ) && ( $subnet['subnet'] <= 24 ) ){
+				/*
+					Check the third Octet
+				*/
 				if( ( $thirdOctet + $subnet['subnet'] ) > 255 ){
 					$newThirdOctet 	= ( $thirdOctet + $subnet['subnet'] ) - 255;
 					$newSecondOctet = $secondOctet + 1;
@@ -215,15 +309,23 @@ class WP_Sandbox_Subnet{
 					$newFirstOctet 	= $firstOctet;
 				}
 
-
+				/*
+					Get the integer values for the subnet
+				*/
 				$min    = ip2long( $subnet['start_ip'] );
         		$max    = ip2long( $newFirstOctet.'.255.255.254' );
         		$needle = ip2long( $ipAddress );  
 
+        		/*
+					Returns true if the IP is in a range.
+				*/
         		if( ( $needle >= $min ) AND ( $needle <= $max ) ){
         			return true;
         		}
 			}else if( $subnet['subnet'] > 24 ){
+				/*
+					Check the fourth Octet
+				*/
 				if( ( $fourthOctet + $subnet['subnet'] ) > 255 ){
 					$newFourthOctet = ( $fourthOctet + $subnet['subnet'] ) - 255;
 					$newThirdOctet 	= $thirdOctet + 1;
@@ -236,11 +338,16 @@ class WP_Sandbox_Subnet{
 					$newFirstOctet 	= $firstOctet;
 				}
 
-
+				/*
+					Get the integer values for the subnet
+				*/
 				$min    = ip2long( $subnet['start_ip'] );
         		$max    = ip2long( $newFirstOctet.'.255.255.254' );
         		$needle = ip2long( $ipAddress );  
 
+        		/*
+					Returns true if the IP is in a range.
+				*/
         		if( ( $needle >= $min ) AND ( $needle <= $max ) ){
         			return true;
         		}
@@ -254,24 +361,38 @@ class WP_Sandbox_Subnet{
 		return false;
 	}
 
-	/*------------------------------------------------
-		Gets all network authenticated subnets. This 
-		is only called from a multisite instance so 
-		we know it's multisite.
-	------------------------------------------------*/
-	public static function getNetworkAuthenticatedSubnets(){
+	/**
+	 * Gets all network authenticated subnets. This is only called from a 
+	 * multisite instance so we know it's multisite.
+	 *
+	 * @since      1.0.0
+	 * @access     public
+	 */
+	public static function get_network_authenticated_subnets(){
 		global $wpdb;
 		global $switched;
 
+		/*
+			Switch to the top level blog
+		*/
 		switch_to_blog(1);
 
+		/*
+			Gets the authenticated subnets for the sites
+		*/
 		$authenticatedSubnets = $wpdb->get_results(
 			"SELECT *
 			 FROM ".$wpdb->prefix."wps_subnets",
 		ARRAY_A );
 
+		/*
+			Restores the current blog
+		*/
 		restore_current_blog();
 
+		/*
+			Returns the authenticated subnets
+		*/
 		return $authenticatedSubnets;
 	}
 }

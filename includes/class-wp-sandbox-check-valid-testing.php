@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Fired during plugin activation
+ * Determines if an IP is valid for site testing
  *
  * @link       https://521dimensions.com
  * @since      1.0.0
@@ -11,26 +11,57 @@
  */
 
 /**
- * Fired during plugin activation.
+ * Determines if an IP is valid for site testing
  *
- * This class defines all code necessary to run during the plugin's activation.
+ * Checks all of the different access rules to see if a user has access
+ * for to test and view the site.
  *
  * @since      1.0.0
  * @package    WP_Sandbox
- * @subpackage WP_Sandbox/includes/access
+ * @subpackage WP_Sandbox/includes
  * @author     521 Dimensions <dan@521dimensions.com>
  */
 class WP_Sandbox_Check_Valid_Testing{
+	/**
+	 * Check to see if the user can access their site off of an IP
+	 *
+	 * @since    1.0.0
+	 * @access   public
+	 */
 	public function check_valid_testing(){
+		/*
+			Removed the expired rules
+		*/
 		$this->remove_expired_rules();
 
+		/*
+			Checks if the user is not logged in. Logged in users always have
+			access.
+		*/
 		if( !is_user_logged_in() ){
+			/*
+				Check if the page being viewed is not a log in page. Log in
+				pages are always accessible
+			*/
 			if( !$this->check_if_login_page() ){
-				$pluginStatus = WP_Sandbox_Settings::getPluginStatus();
+				/*
+					Get the plugin status
+				*/
+				$pluginStatus = WP_Sandbox_Settings::get_plugin_status();
 
+				/*
+					If the plugin status is 1, activated, then check the IP
+					accessing the site and see if it's accessible.
+				*/
 				if( $pluginStatus == '1' ){
+					/*
+						Get the IP accessing the site.
+					*/
 					$ip = self::get_ip();
 
+					/*
+						Check to see if the URL contains a valid preview URL.
+					*/
 					if( WP_Sandbox_Preview_URL::check_valid_preview_url() ){
 						return true;
 					}
@@ -81,17 +112,27 @@ class WP_Sandbox_Check_Valid_Testing{
 		}
 	}
 
-	/*------------------------------------------------
-		Checks the database for expired rules.  If the rule in the database has an expiration
-		date before the current time it is removed.
-
-		The exception being when the date is == '0000-00-00 00:00:00' that means the rule 
-		never expires.
-	------------------------------------------------*/
+	/**
+	 * Checks the database for expired rules.  If the rule in the database has an expiration
+	 * date before the current time it is removed.
+	 *
+	 * The exception being when the date is == '0000-00-00 00:00:00' that means the rule 
+	 * never expires.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
 	private function remove_expired_rules(){
 		global $wpdb;
 
+		/*
+			If the site is multisite, switch to the top level blog
+			to get the expired rules.
+		*/
 		if( is_multisite() ){
+			/*
+				Get the current blog ID.
+			*/
 			$currentBlogID = get_current_blog_id();
 
 			/*
@@ -180,7 +221,7 @@ class WP_Sandbox_Check_Valid_Testing{
 		*/
 		foreach( $users as $user ){
 			if( $user['expires'] != '0000-00-00 00:00:00' ){
-				WP_Sandbox_Authenticated_Users::deleteAuthenticatedUser( $user['id'] );
+				WP_Sandbox_Authenticated_Users::delete_authenticated_user( $user['id'] );
 			}
 		}
 
@@ -189,7 +230,7 @@ class WP_Sandbox_Check_Valid_Testing{
 		*/
 		foreach( $ips as $ip ){
 			if( $ip['expires'] != '0000-00-00 00:00:00' ){
-				WP_Sandbox_IP::deleteIP( $ip['id'] );
+				WP_Sandbox_IP::delete_ip( $ip['id'] );
 			}
 		}
 		
@@ -198,7 +239,7 @@ class WP_Sandbox_Check_Valid_Testing{
 		*/
 		foreach( $ipRanges as $ipRange ){
 			if( $ipRange['expires'] != '0000-00-00 00:00:00' ){
-				WP_Sandbox_IP_Range::deleteRange( $ipRange['id'] );
+				WP_Sandbox_IP_Range::delete_range( $ipRange['id'] );
 			}
 		}
 
@@ -207,17 +248,24 @@ class WP_Sandbox_Check_Valid_Testing{
 		*/
 		foreach( $subnets as $subnet ){
 			if( $subnet['expires'] != '0000-00-00 00:00:00' ){
-				WP_Sandbox_Subnet::deleteSubnet( $subnet['id'] );
+				WP_Sandbox_Subnet::delete_subnet( $subnet['id'] );
 			}
 		}
 	}
 
-	/*------------------------------------------------
-		Checks if the page is a log in page on Wordpress. 
-		Allows front-end users to log in.
-		@return bool
-	------------------------------------------------*/
+	/**
+	 * Checks if the page is a log in page on Wordpress. Allows front-end users 
+	 * to log in.
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 * @return 	 bool
+	 */
 	private function check_if_login_page(){
+		/*
+			If is admin, return true otherwise check to see if the current page
+			is a page that allows the user to register or log in.
+		*/
 		if( is_admin() ){
 			return true;
 		}else{
@@ -225,9 +273,12 @@ class WP_Sandbox_Check_Valid_Testing{
 		}
 	}
 
-	/*------------------------------------------------
-		Gets the IP address to be tested
-	------------------------------------------------*/
+	/**
+	 * Gets the IP address to be tested
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
 	public static function get_ip(){
 		/*
 			Checks for a CloudFlare IP first.
@@ -242,10 +293,19 @@ class WP_Sandbox_Check_Valid_Testing{
 		return $_SERVER['REMOTE_ADDR'];
 	}
 
+	/**
+	 * Display the coming soon page
+	 *
+	 * @since    1.0.0
+	 * @access   private
+	 */
 	private function display_coming_soon(){
 		global $wpdb;
 
-		$defaultPage = WP_Sandbox_Settings::getDefaultPage();
+		/*
+			Get the default page.
+		*/
+		$defaultPage = WP_Sandbox_Settings::get_default_page();
 
 		/*
 			If 404 is the default, search for the 404 template.  
