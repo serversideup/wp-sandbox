@@ -15,7 +15,7 @@
 
 <!-- This file should primarily consist of HTML with a little bit of PHP. -->
 
-<img class="wps-header-logo" src="<?php echo plugins_url(); ?>/wp-sandbox/images/wp-sandbox-logo-large.png"/>
+<img class="wps-header-logo" src="<?php echo plugins_url(); ?>/wp-sandbox/admin/images/wp-sandbox-logo-large.png"/>
 <br>Version: <?php echo $version; ?><br>
 
 <div class="wrap">

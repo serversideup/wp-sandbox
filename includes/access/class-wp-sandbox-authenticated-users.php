@@ -307,44 +307,10 @@ class WP_Sandbox_Authenticated_Users{
 				logged in.
 			*/
 			if( is_user_logged_in() ){
-
 				/*
-					Get the current user authenticated and their ID
+					Sets a preview cookie for the valid user
 				*/
-				$current_user = wp_get_current_user();
-				
-				$userID = $current_user->data->ID;
-
-				/* 
-					Gets the IP for the user 
-				*/
-				$ip = WP_Sandbox_Check_Valid_Testing::get_ip();
-
-				/*
-					If the IP is not in any ranges or networks or
-					not individually added anywhere, then we add
-					it because the user has authentication rights.
-				*/
-				if( !self::check_valid_ip( $ip ) 
-					&& !WP_Sandbox_IP::check_valid_ip( $ip )  
-					&& !WP_Sandbox_IP_Range::check_valid_ip_range( $ip ) 
-					&& !WP_Sandbox_Subnet::check_valid_ip_subnet( $ip ) ){
-
-					/*
-						Get the default expiration time set
-					*/
-					$defaultExpirationTime = WP_Sandbox_Settings::get_default_expiration_time();
-
-					/*
-						Get the expiration date for the user's login.
-					*/
-					$expirationTime = WP_Sandbox_Settings::get_expiration_time( $defaultExpirationTime );
-
-					/*
-						Add the authenticated user.
-					*/
-					self::add_authenticated_user( $userID, $ip, $expirationTime );
-				}
+				WP_Sandbox_Preview_URL::set_preview_cookie();
 			}
 		}
 	}

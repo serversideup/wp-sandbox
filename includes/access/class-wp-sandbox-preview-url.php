@@ -168,11 +168,11 @@ class WP_Sandbox_Preview_URL{
 					in 10 years.
 				*/
 				if( $defaultExpirationTime == 'never' ){
-					setcookie( 'wp-sandbox-preview-hash', $hash, time() + (10 * 365 * 24 * 60 * 60) );
+					setcookie( 'wp-sandbox-preview-hash', $hash, time() + (10 * 365 * 24 * 60 * 60), '/' );
 				}else{
 					$futureTimestamp = self::get_future_timestamp( $defaultExpirationTime );
 
-					setcookie( 'wp-sandbox-preview-hash', $hash, $futureTimestamp );
+					setcookie( 'wp-sandbox-preview-hash', $hash, $futureTimestamp, '/' );
 				}
 				
 				return true;
@@ -217,6 +217,32 @@ class WP_Sandbox_Preview_URL{
 				setcookie( 'wp-sandbox-preview-hash' );
 
 				return false;
+			}
+		}
+	}
+
+	/**
+	 * Sets a cookie for the authenticated user
+	 *
+	 * @since 		1.0.0
+	 * @access 		public
+	 */
+	public static function set_preview_cookie(){
+		if( !isset( $_COOKIE['wp-sandbox-preview-hash'] ) ){
+			$previewHash = self::get_preview_hash();
+
+			$defaultExpirationTime = WP_Sandbox_Settings::get_default_expiration_time();
+
+			/*
+				If never, then the cookie is set to expire
+				in 10 years.
+			*/
+			if( $defaultExpirationTime == 'never' ){
+				setcookie( 'wp-sandbox-preview-hash', $previewHash, time() + (10 * 365 * 24 * 60 * 60), '/' );
+			}else{
+				$futureTimestamp = self::get_future_timestamp( $defaultExpirationTime );
+
+				setcookie( 'wp-sandbox-preview-hash', $previewHash, $futureTimestamp, '/' );
 			}
 		}
 	}

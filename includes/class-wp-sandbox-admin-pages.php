@@ -27,8 +27,10 @@ class WP_Sandbox_Admin_Pages{
 	 * @access   private
 	 */
 	public function add_admin_menu(){
-		add_menu_page('WP Sandbox', 'WP Sandbox', 'manage_options', 'wp_sandbox', array( $this, 'settings_page' ), plugins_url().'/wp-sandbox/admin/images/wp-sandbox-logo.png');
-		add_submenu_page('wp_sandbox', 'Access', 'Access', 'manage_options', 'wps_access', array ( $this, 'access_page' ) );
+		add_menu_page('WP Sandbox', 'WP Sandbox', 'manage_options', 'wp_sandbox', array( $this, 'access_page' ), plugins_url().'/wp-sandbox/admin/images/wp-sandbox-logo.png');
+		
+		add_submenu_page('wp_sandbox', 'Access', 'Access', 'manage_options', 'wp_sandbox', array( $this, 'access_page' ) );
+		add_submenu_page('wp_sandbox', 'Settings', 'Settings', 'manage_options', 'wp_sandbox_settings', array( $this, 'settings_page' ) );
 	}
 
 	/**

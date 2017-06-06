@@ -33,7 +33,7 @@ class WP_Sandbox_Check_Valid_Testing{
 			Removed the expired rules
 		*/
 		$this->remove_expired_rules();
-
+		//echo '<pre>'; print_r( $_COOKIE ); echo '</pre>'; die();
 		/*
 			Checks if the user is not logged in. Logged in users always have
 			access.
