@@ -90,7 +90,7 @@ class WP_Sandbox {
 	 * - WP_Sandbox_Public. Defines all hooks for the public side of the site.
 	 * - WP_Sandbox_Database_Management. Manages the creation and destruction of database tables.
 	 * - WP_Sandbox_Check_Valid_Testing. Checks the user accessing the site has access.
-	 * - WP_Sandbox_Rules. Handles the management of access rules. 
+	 * - WP_Sandbox_Rules. Handles the management of access rules.
 	 * - WP_Sandbox_Settings. Handles the management of plugin settings.
 	 * - WP_Sandbox_Default Settings. Sets default settings for the plugin.
 	 * - WP_Sandbox_Subnet. Handles the management of subnet access rules.
@@ -300,21 +300,36 @@ class WP_Sandbox {
 		$this->loader->add_action( 'admin_menu', $adminPages, 'add_admin_menu' );
 
 		/*
+			Adds the settings link to the plugin list
+		*/
+		$this->loader->add_filter( 'plugin_action_links_wp-sandbox/wp-sandbox.php', $adminPages, 'add_settings_link' );
+
+		/*
 			Adds AJAX hooks for adding and removing access rules.
 		*/
 		$this->loader->add_action( 'wp_ajax_wp_sandbox_add_rule', $accessRules, 'wp_sandbox_add_rule');
 		$this->loader->add_action( 'wp_ajax_wp_sandbox_remove_rule', $accessRules, 'wp_sandbox_remove_rule');
-		
+
 		/*
 			Adds the AJAX hook to regenerate the preview URL.
 		*/
 		$this->loader->add_action( 'wp_ajax_wp_sandbox_regenerate_url', $previewURL, 'regenerate_preview_url');
-			
+
 		/*
 			Adds the AJAX hooks to save settings and enable/disable blogs.
 		*/
 		$this->loader->add_action( 'wp_ajax_wp_sandbox_save_settings', $settings, 'save_settings' );
 		$this->loader->add_action( 'wp_ajax_wp_sandbox_enable_disable_blogs', $settings, 'enable_disable_blogs' );
+
+		/*
+			Adds the AJAX hooks to save the landing page.
+		*/
+		$this->loader->add_action( 'wp_ajax_wp_sandbox_update_design', $settings, 'update_design' );
+
+		/*
+			Saves whether the plugin is enabled or not.
+		*/
+		$this->loader->add_action( 'wp_ajax_wp_sandbox_save_enabled', $settings, 'save_enabled' );
 	}
 
 	/**

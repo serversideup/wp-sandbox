@@ -61,6 +61,7 @@ class WP_Sandbox_Admin {
 	 */
 	public function enqueue_styles() {
 		wp_enqueue_style( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'css/wp-sandbox-admin.css', array(), $this->version, 'all' );
+		wp_enqueue_style( 'colorpicker-styles', plugin_dir_url( __FILE__ ) . 'css/colorpicker.css', array(), $this->version, 'all' );
 	}
 
 	/**
@@ -70,5 +71,7 @@ class WP_Sandbox_Admin {
 	 */
 	public function enqueue_scripts() {
 		wp_enqueue_script( $this->plugin_name, plugin_dir_url( __FILE__ ) . 'js/wp-sandbox-admin.js', array( 'jquery' ), $this->version, false );
+		wp_enqueue_script( 'colorpicker-js', plugin_dir_url( __FILE__ ) . 'js/colorpicker.js', array('jquery'), $this->version, false );
+		wp_enqueue_media();
 	}
 }

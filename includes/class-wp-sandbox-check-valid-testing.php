@@ -33,7 +33,7 @@ class WP_Sandbox_Check_Valid_Testing{
 			Removed the expired rules
 		*/
 		$this->remove_expired_rules();
-		//echo '<pre>'; print_r( $_COOKIE ); echo '</pre>'; die();
+
 		/*
 			Checks if the user is not logged in. Logged in users always have
 			access.
@@ -116,7 +116,7 @@ class WP_Sandbox_Check_Valid_Testing{
 	 * Checks the database for expired rules.  If the rule in the database has an expiration
 	 * date before the current time it is removed.
 	 *
-	 * The exception being when the date is == '0000-00-00 00:00:00' that means the rule 
+	 * The exception being when the date is == '0000-00-00 00:00:00' that means the rule
 	 * never expires.
 	 *
 	 * @since    1.0.0
@@ -139,20 +139,20 @@ class WP_Sandbox_Check_Valid_Testing{
 				Gets expired users
 			*/
 			$users = $wpdb->get_results( $wpdb->prepare(
-				"SELECT * 
+				"SELECT *
 				 FROM ".$wpdb->prefix."wps_authenticated_users
 				 WHERE expires < CURDATE()
 				 AND blog_id = '%d'",
 				 $currentBlogID
 			), ARRAY_A );
-			
+
 			/*
 				Gets expired IPs
 			*/
 			$ips = $wpdb->get_results( $wpdb->prepare(
-				"SELECT * 
-				 FROM ".$wpdb->prefix."wps_ips 
-				 WHERE expires < CURDATE() 
+				"SELECT *
+				 FROM ".$wpdb->prefix."wps_ips
+				 WHERE expires < CURDATE()
 				 AND blog_id = '%d'",
 				 $currentBlogID
 			), ARRAY_A );
@@ -161,7 +161,7 @@ class WP_Sandbox_Check_Valid_Testing{
 				Gets expired IP Ranges
 			*/
 			$ipRanges = $wpdb->get_results( $wpdb->prepare(
-				"SELECT * 
+				"SELECT *
 				 FROM ".$wpdb->prefix."wps_ip_ranges
 				 WHERE expires < CURDATE()
 				 AND blog_id = '%d'",
@@ -192,8 +192,8 @@ class WP_Sandbox_Check_Valid_Testing{
 				Gets expired IPs
 			*/
 			$ips = $wpdb->get_results(
-				"SELECT * 
-				 FROM ".$wpdb->prefix."wps_ips 
+				"SELECT *
+				 FROM ".$wpdb->prefix."wps_ips
 				 WHERE expires < CURDATE()",
 				 ARRAY_A );
 
@@ -201,7 +201,7 @@ class WP_Sandbox_Check_Valid_Testing{
 				Gets expired IP Ranges
 			*/
 			$ipRanges = $wpdb->get_results(
-				"SELECT * 
+				"SELECT *
 				 FROM ".$wpdb->prefix."wps_ip_ranges
 				 WHERE expires < CURDATE()",
 				 ARRAY_A );
@@ -215,7 +215,7 @@ class WP_Sandbox_Check_Valid_Testing{
 				 WHERE expires < CURDATE()",
 			 	 ARRAY_A );
 		}
-		
+
 		/*
 			Removes expired users
 		*/
@@ -233,7 +233,7 @@ class WP_Sandbox_Check_Valid_Testing{
 				WP_Sandbox_IP::delete_ip( $ip['id'] );
 			}
 		}
-		
+
 		/*
 			Removes expired IP Ranges
 		*/
@@ -254,7 +254,7 @@ class WP_Sandbox_Check_Valid_Testing{
 	}
 
 	/**
-	 * Checks if the page is a log in page on Wordpress. Allows front-end users 
+	 * Checks if the page is a log in page on Wordpress. Allows front-end users
 	 * to log in.
 	 *
 	 * @since    1.0.0
@@ -302,42 +302,10 @@ class WP_Sandbox_Check_Valid_Testing{
 	private function display_coming_soon(){
 		global $wpdb;
 
-		/*
-			Get the default page.
-		*/
-		$defaultPage = WP_Sandbox_Settings::get_default_page();
+		$settings = WP_Sandbox_Settings::get_all_settings();
+		
+		require WP_PLUGIN_DIR .'/wp-sandbox/public/partials/wp-sandbox-public-display.php';
 
-		/*
-			If 404 is the default, search for the 404 template.  
-			If there is no template, throw a 404 error.
-		*/
-		if( $defaultPage == '404' ){
-			header("HTTP/1.0 404 Not Found - Archive Empty");
-			$locate_template = locate_template( '404.php' );
-
-			if ( !empty( $locate_template ) ){
-				require TEMPLATEPATH.'/404.php';
-			}
-
-			exit;
-		}
-
-		/*
-			If the setting value is blank, throw a blank page.
-		*/
-		if( $defaultPage == 'blank'){
-			header("HTTP/1.0 404 Not Found - Archive Empty");
-			exit;
-		}
-
-		/*
-			If a page is set, display the page, and throw a 'wps' 
-			parameter in the GET so there are no infinite redirects.
-		*/
-		if( !isset($_GET['wps'] ) || $_GET['wps'] != 'true' ){
-			$url = $checkDefaultWPSPage[0]['setting_value'].'?wps=true';
-			wp_redirect( $url );
-			exit;
-		}
+		exit;
 	}
 }

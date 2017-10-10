@@ -31,8 +31,8 @@ class WP_Sandbox_Rules {
 			Defines the variables to pass to the function
 			that would add to the database.
 		*/
-		$type 			= $_POST['type'];
-		$rule 			= $_POST['rule'];
+		$type 				= $_POST['type'];
+		$rule 				= $_POST['rule'];
 		$expiration 	= WP_Sandbox_Settings::get_expiration_time( $_POST['expiration'] );
 
 		/*
@@ -69,10 +69,10 @@ class WP_Sandbox_Rules {
 			Returns the new information so it
 			can be added to the table.
 		*/
-		wp_send_json( array( 
-			'type' => $typeDisplay, 
-			'rule' => $rule, 
-			'expiration' => $expiration != '' ? date('m-d-Y H:i:s', strtotime( $expiration ) ) : 'Never', 
+		wp_send_json( array(
+			'type' => $typeDisplay,
+			'rule' => $rule,
+			'expiration' => $expiration != '' ? date('m-d-Y H:i:s', strtotime( $expiration ) ) : 'Never',
 			'added_by' =>  $user->user_login,
 			'rule_id' => $ruleID ) );
 

@@ -1,9 +1,13 @@
-/**
- * All of the CSS for your admin-specific functionality should be
- * included in this file.
- */
-  .wps-admin-bar-disabled{
-    background: #ff4343 !important; /* Old browsers */ 
+/*
+    Open Sans Font
+*/
+@import url('https://fonts.googleapis.com/css?family=Open+Sans:300,400,600,700');
+
+/*
+    Admin Bar State Styles
+*/
+.wp-sandbox-admin-bar-disabled{
+    background: #ff4343 !important; /* Old browsers */
     background: -moz-linear-gradient(top,  #ff4343 0%, #ef2424 50%, #e20a0a 100%) !important; /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#ff4343), color-stop(50%,#ef2424), color-stop(100%,#e20a0a)) !important; /* Chrome,Safari4+ */
     background: -webkit-linear-gradient(top,  #ff4343 0%,#ef2424 50%,#e20a0a 100%) !important; /* Chrome10+,Safari5.1+ */
@@ -12,8 +16,8 @@
     background: linear-gradient(to bottom,  #ff4343 0%,#ef2424 50%,#e20a0a 100%) !important; /* W3C */
     filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#ff4343', endColorstr='#e20a0a',GradientType=0 ) !important; /* IE6-9 */
 }
-.wps-admin-bar-enabled{
-    background: #28cc33 !important; /* Old browsers */ 
+.wp-sandbox-admin-bar-enabled{
+    background: #28cc33 !important; /* Old browsers */
     background: -moz-linear-gradient(top,  #28cc33 0%, #23bc56 50%, #2ab73a 100%) !important; /* FF3.6+ */
     background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#28cc33), color-stop(50%,#23bc56), color-stop(100%,#2ab73a)) !important; /* Chrome,Safari4+ */
     background: -webkit-linear-gradient(top,  #28cc33 0%,#23bc56 50%,#2ab73a 100%) !important; /* Chrome10+,Safari5.1+ */
@@ -24,10 +28,18 @@
 }
 
 /*
+    WP Sandbox Disabled
+*/
+div#wp-sandbox-disabled{
+    margin: 25px 20px 0 2px;
+    padding: 11px 15px;
+}
+
+/*
     Panel Styles
 */
-div.wps-panel{
-    margin: 16px 0;
+div.wp-sandbox-panel{
+    margin: 25px 20px 0 2px;
     padding: 10px 10px;
     border: 1px solid #e5e5e5;
     -webkit-box-shadow: 0 1px 1px rgba(0,0,0,.04);
@@ -36,88 +48,274 @@ div.wps-panel{
     font-size: 13px;
     line-height: 2.1em;
 }
-div.wps-panel h3{
-    margin: 0;
+
+div.wp-sandbox-panel div.row{
+    max-width: 75rem;
+    margin-right: auto;
+    margin-left: auto;
+}
+
+div.wp-sandbox-panel div.row:after{
+    content: "";
+    display: table;
+    clear: both;
+}
+
+div.wp-sandbox-panel div.row div.half{
+    float: left;
+    width: 50%;
+}
+
+div.wp-sandbox-panel div.row div.full{
+    float: left;
+    width: 100%;
+}
+
+div.wp-sandbox-panel p{
+    color: #444444;
+    font-size: 13px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+/*
+    Header Specific Elements
+*/
+div#wp-sandbox-header{
+    margin-bottom: 0px;
+}
+img.wp-sandbox-logo{
+    display: block;
+}
+span.sub-title{
+    color: #9B9B9B;
+    font-size: 11px;
+}
+a#wp-sandbox-github-link{
+    color: #9B9B9B;
+    font-size: 11px;
+}
+div#wp-sandbox-settings-nav{
+    margin-top: 0px;
+    background-color: #F5F5F5;
+    border: 1px solid #E5E5E5;
+    text-align: center;
+}
+span.wp-sandbox-settings-link{
+    display: inline-block;
     font-size: 16px;
-    font-weight: 400;
-    line-height: 1.2;
+    color: #232323;
+    padding-left: 13px;
+    padding-right: 13px;
+    padding-top: 9px;
+    padding-bottom: 9px;
+    border-radius: 5px;
+    cursor: pointer;
 }
-
-/*
-    Labels
-*/
-label.wps-label{
-    font-size: 14px;
+span.wp-sandbox-settings-link.wp-sandbox-active-settings-link{
+    background-color: #E0E0E0;
+    color: #1E7DA5;
     font-weight: 600;
-    display: inline-block;
-    width: 100px;
-}
-label.wps-large-label{
-    width: 200px;
-}
-span.wps-radio-label{
-    display: inline-block;
 }
 
 /*
-    Text Boxes
+    On/Off Switch
 */
-input[type="text"].wps-text{
-    width: 75%;
+div#wp-sandbox-on-off-container{
+    float: right;
+}
+.wp-sandbox-on-off-switch {
+    position: relative;
+    width: 86px;
+    margin: auto;
+    margin-top: 7px;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select: none;
+}
+.wp-sandbox-on-off-switch-checkbox {
+    display: none !important;
+}
+.wp-sandbox-on-off-switch-label {
+    display: block;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid #E3E3E3;
+    border-radius: 23px;
+}
+.wp-sandbox-on-off-switch-inner {
+    display: block;
+    width: 200%;
+    margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.wp-sandbox-on-off-switch-inner:before, .wp-sandbox-on-off-switch-inner:after {
+    display: block;
+    float: left;
+    width: 50%;
+    height: 40px;
+    padding: 0;
+    line-height: 40px;
+    font-size: 16px;
+    color: white;
+    font-family: Trebuchet, Arial, sans-serif;
+    font-weight: bold;
+    box-sizing: border-box;
+}
+.wp-sandbox-on-off-switch-inner:before {
+    content: "On";
+    padding-left: 10px;
+    background-color: #49E845;
+    color: #FFFFFF;
+}
+.wp-sandbox-on-off-switch-inner:after {
+    content: "Off";
+    padding-right: 10px;
+    background-color: #DDDDDD;
+    color: #666666;
+    text-align: right;
+}
+.wp-sandbox-on-off-switch-switch {
+    display: block;
+    width: 40px;
+    margin: 0px;
+    background: #FFFFFF;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 42px;
+    border: 2px solid #E3E3E3;
+    border-radius: 23px;
+    transition: all 0.3s ease-in 0s;
+}
+.wp-sandbox-on-off-switch-checkbox:checked + .wp-sandbox-on-off-switch-label .wp-sandbox-on-off-switch-inner {
+    margin-left: 0;
+}
+.wp-sandbox-on-off-switch-checkbox:checked + .wp-sandbox-on-off-switch-label .wp-sandbox-on-off-switch-switch {
+    right: 0px;
+}
+
+/* Headings */
+h2.wp-sandbox-settings-heading{
+    color: #232323;
+    font-size: 23px;
+    line-height: 32px;
+    font-family: 'Open Sans', sans-serif;
+    margin: 0px;
+    margin-top: 30px;
+    margin-bottom: 5px;
+}
+
+h3.wp-sandbox-settings-sub-heading{
+    color: #7C7C7C;
+    font-size: 18px;
+    line-height: 24px;
+    font-weight: 100;
+    font-family: 'Open Sans', sans-serif;
+    margin: 0px;
+    margin-bottom: 10px;
+}
+
+h4.wp-sandbox-panel-title{
+    color: #000000;
+    font-size: 16px;
+    line-height: 22px;
+    font-weight: 600;
+    font-family: 'Open Sans', sans-serif;
+    margin: 0px;
+    margin-bottom: 10px;
+}
+
+/*
+   Share URL
+*/
+input[type="text"].wp-sandbox-share-url{
+    padding: 10px;
+    width: calc( 100% - 150px );
+}
+button#wp-sandbox-regenerate-url{
+    float: right;
+    margin-top: 5px;
+}
+
+/*
+    Example Access
+*/
+span.access-example{
+    font-size: 13px;
+    font-weight: bold;
+    color: #444444;
+    font-family: 'Open Sans', sans-serif;
+    width: 150px;
+    display: inline-block;
+}
+span.access-example-format{
+    font-size: 13px;
+    color: #444444;
+    font-family: 'Open Sans', sans-serif;
+}
+
+/*
+    Add Access Rule
+*/
+div#wp-sandbox-add-access-container{
+    margin-bottom: 0px;
+}
+
+input[type="text"].wp-sandbox-new-access-rule{
+    padding: 10px;
+    width: calc( 100% - 340px );
+}
+
+select#wp-sandbox-access-rule-expires{
+    width: 185px;
+    height: 39px;
+    line-height: 39px;
+    margin-top: -5px;
+}
+
+button#wp-sandbox-add-access-rule{
+    margin-top: 5px;
+    float: right;
+}
+
+div.wp-sandbox-rules-table-container{
+    margin: 25px 20px 0 2px;
+    margin-top: 0px;
+}
+
+table#wp-sandbox-access-rule-table{
+    width: 100%;
+    margin-top: -2px;
+    border-collapse: collapse;
+}
+
+table#wp-sandbox-access-rule-table thead tr{
+    background-color: #E0E0E0;
+}
+
+table#wp-sandbox-access-rule-table thead tr th{
+    font-weight: 600;
+    font-size: 16px;
+    text-align: center;
     padding: 10px;
 }
 
-/*
-    Radio buttons
-*/
-input[type="radio"].wps-radio{
-    margin: 0px 5px;
-}
-/*
-    Table Styles
-*/
-table.wps-table{
-    width: 100%;
-    border-collapse: collapse;
-}
-table.wps-table thead{
-    background-color: #d9edf7;
-}
-table.wps-table thead tr td{
-    font-weight: 600;
-    text-align: center;
-    width: 20%;
-}
-table.wps-table tbody tr:nth-child( even ){
-    background-color: #eee;
+table#wp-sandbox-access-rule-table tbody tr:nth-child( even ){
+    background-color: #F5F5F5;
 }
 
-table.wps-table tbody tr td{
-    text-align: center;
+table#wp-sandbox-access-rule-table tbody tr:nth-child( odd ){
+    background-color: #FFFFFF;
 }
 
-/*
-    Enabled Sites Table
-*/
-table#wps-enabled-sites-table tbody tr td:nth-child(1){
-    width: 10%;
+table#wp-sandbox-access-rule-table tbody tr td{
+    font-size: 13px;
+    text-align: center;
+    padding: 10px;
 }
-table#wps-enabled-sites-table tbody tr td:nth-child(2){
-    width: 45%;
-}
-table#wps-enabled-sites-table tbody tr td:nth-child(3){
-    width: 45%;
-}
-/*
-    Network Access Table
-*/
-table#wps-network-access-table{
-    table-layout: fixed;
-}
-/*
-    Manage Access
-*/
-a.wps-remove-access{
+
+table#wp-sandbox-access-rule-table tbody tr td a{
+    color: #1E7DA5;
     cursor: pointer;
 }
 
@@ -131,42 +329,188 @@ div.validation{
 }
 
 /*
-    Settings saved display
+    Coming Soon Template Preview
 */
-div#wps-settings-saved{
-    font-size: 15px;
+div#wp-sandbox-design-page{
+    display: none;
+}
+
+div#wp-sandbox-coming-soon-template-preview{
+    height: 630px;
+     /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#5cccf0+0,3884e8+100 */
+    background: #5cccf0; /* Old browsers */
+    background: -moz-linear-gradient(45deg, #5cccf0 0%, #3884e8 100%); /* FF3.6-15 */
+    background: -webkit-linear-gradient(45deg, #5cccf0 0%,#3884e8 100%); /* Chrome10-25,Safari5.1-6 */
+    background: linear-gradient(45deg, #5cccf0 0%,#3884e8 100%); /* W3C, IE10+, FF16+, Chrome26+, Opera12+, Safari7+ */
+    filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#5cccf0', endColorstr='#3884e8',GradientType=1 ); /* IE6-9 fallback on horizontal gradient */
+    overflow: auto;
+    position: relative;
+}
+
+div#wp-sandbox-coming-soon-template-preview div#wp-sandbox-coming-soon-template-container{
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 100%;
+}
+
+div#wp-sandbox-coming-soon-template-preview img#wp-sandbox-coming-soon-template-preview-logo{
+  max-width: 300px;
+  margin: auto;
+  display: block;
+  margin-bottom: 20px;
+}
+
+div#wp-sandbox-coming-soon-template-preview h2#wp-sandbox-coming-soon-template-preview-header{
+    color: white;
     font-weight: bold;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    margin-left: 0px;
-    margin-right: 20px;
-    margin-top: 15px;
-    display: none;
-}
-
-/*
-    Disabled Banner
-*/
-div#wps-disabled-banner{
-    margin-left: 0px;
-    margin-right: 20px;
-    margin-top: 15px;
-    border: rgb(237, 65, 41) solid 3px;
-    background-color: rgb(250, 223, 222);
-    color: black;
     text-align: center;
-    height: 30px;
-    line-height: 30px;
-    font-size: 15px;
+    font-size: 42px;
 }
 
-div.wps-disabled-banner-enabled{
-    display: none;
+div#wp-sandbox-coming-soon-template-preview h3#wp-sandbox-coming-soon-template-preview-sub-header{
+    color: white;
+    font-size: 16px;
+    text-align: center;
 }
 
-/*
-    Admin header logo
-*/
-img.wps-header-logo{
-    margin: 10px 5px;
+div#wp-sandbox-social-icon-container{
+  text-align: center;
+}
+
+span#wp-sandbox-coming-soon-template-preview-login{
+  display: block;
+  color: white;
+  font-size: 16px;
+  text-align: center;
+  margin-top: 100px;
+}
+
+span#wp-sandbox-coming-soon-template-preview-login a{
+  color: white;
+  text-decoration: underline;
+}
+
+div#wp-sandbox-social-icon-container img{
+  display: inline-block;
+  margin-left: 20px;
+  margin-right: 20px;
+  display: none;
+}
+
+div#background-color-1{
+    width: 36px;
+    height: 36px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+div#background-color-2{
+    width: 36px;
+    height: 36px;
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+div.design-form-row{
+    max-width: 75% !important;
+    margin-bottom: 10px;
+}
+
+div.design-form-row label{
+    display: inline-block;
+    width: 150px;
+}
+
+div.design-form-row input[type="text"]{
+    width: calc( 100% - 160px );
+}
+
+div.design-form-row input#wp-sandbox-design-logo{
+  width: calc( 100% - 270px );
+}
+
+div#wp-sandbox-show-login-link-switch-container{
+  display: inline-block;
+  position: relative;
+  vertical-align: middle;
+}
+
+.wp-sandbox-show-login-switch {
+    position: relative;
+    width: 86px;
+    margin: auto;
+    margin-top: 7px;
+    -webkit-user-select:none;
+    -moz-user-select:none;
+    -ms-user-select: none;
+}
+.wp-sandbox-show-login-switch-checkbox {
+    display: none !important;
+}
+.wp-sandbox-show-login-switch-label {
+    display: block !important;
+    overflow: hidden;
+    cursor: pointer;
+    border: 2px solid #E3E3E3;
+    border-radius: 23px;
+    width: 80px !important;
+}
+.wp-sandbox-show-login-switch-inner {
+    display: block;
+    width: 200%;
+    margin-left: -100%;
+    transition: margin 0.3s ease-in 0s;
+}
+.wp-sandbox-show-login-switch-inner:before, .wp-sandbox-show-login-switch-inner:after {
+    display: block;
+    float: left;
+    width: 50%;
+    height: 40px;
+    padding: 0;
+    line-height: 40px;
+    font-size: 16px;
+    color: white;
+    font-family: Trebuchet, Arial, sans-serif;
+    font-weight: bold;
+    box-sizing: border-box;
+}
+.wp-sandbox-show-login-switch-inner:before {
+    content: "On";
+    padding-left: 10px;
+    background-color: #00A0D2;
+    color: #FFFFFF;
+}
+.wp-sandbox-show-login-switch-inner:after {
+    content: "Off";
+    padding-right: 10px;
+    background-color: #DDDDDD;
+    color: #666666;
+    text-align: right;
+}
+.wp-sandbox-show-login-switch-switch {
+    display: block;
+    width: 40px;
+    margin: 0px;
+    background: #FFFFFF;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 42px;
+    border: 2px solid #E3E3E3;
+    border-radius: 23px;
+    transition: all 0.3s ease-in 0s;
+}
+.wp-sandbox-show-login-switch-checkbox:checked + .wp-sandbox-show-login-switch-label .wp-sandbox-show-login-switch-inner {
+    margin-left: 0;
+}
+.wp-sandbox-show-login-switch-checkbox:checked + .wp-sandbox-show-login-switch-label .wp-sandbox-show-login-switch-switch {
+    right: 0px;
+}
+
+div.design-settings-updated{
+  display: none;
+  color: green;
 }

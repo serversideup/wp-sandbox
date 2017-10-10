@@ -31,14 +31,14 @@ class WP_Sandbox_Settings{
 		global $wpdb;
 
 		/*
-			Calls the methods needed to 
+			Calls the methods needed to
 			save settings that are not
 			saved directly through an AJAX
 			call.
 		*/
-		$defaultPage 			= self::save_default_page_setting();
+		$defaultPage 						= self::save_default_page_setting();
 		$defaultExpirationTime 	= self::save_default_expire_time();
-		$publicAccess 			= self::save_public_access();
+		$publicAccess 					= self::save_public_access();
 
 		/*
 			Builds the successful return response.
@@ -57,125 +57,56 @@ class WP_Sandbox_Settings{
 	}
 
 	/**
-	 * Saves the default page setting.
+	 * Saves the enabled setting
 	 *
 	 * @since    1.0.0
 	 * @access 	 public
 	 */
-	public static function save_default_page_setting(){
+	public static function save_enabled(){
 		global $wpdb;
 
 		/*
-			Gets the default page set
+			Gets the enabled settings
 			by the user.
 		*/
-		$defaultPage 	= $_POST['default_page'];
+		$enabled = $_POST['enabled'] == 'true' ? 1 : 0;
 
 		/*
 			If it's a multisite install, switch
 			the blog and update the values
 		*/
 		if( is_multisite() ){
-			/*
-				Get the current blog ID
-			*/
-			$currentBlogID = get_current_blog_id();
-
-			/*
-				Switches to the correct blog and update the default page setting.
-			*/
-			global $switched;
-			switch_to_blog(1);
-
-			/*
-				Updates the default page settings.
-			*/
-			$wpdb->query( $wpdb->prepare(
-				"UPDATE ".$wpdb->prefix."wps_settings 
-				SET setting_value = '%s' 
-				WHERE setting_name = 'Default Page' 
-				AND blog_id = '%d'",
-				$defaultPage,
-				$currentBlogID
-			) );
-			
-			restore_current_blog();
-		}else{
-			/*
-				Updates the default page settings.
-			*/
-			$wpdb->query( $wpdb->prepare(
-				"UPDATE ".$wpdb->prefix."wps_settings 
-				SET setting_value = '%s' 
-				WHERE setting_name = 'Default Page'",
-				$defaultPage
-			) );
-		}
-
-		/*
-			Returns the default page.
-		*/
-		return $defaultPage;
-	}
-
-	/**
-	 * Saves the default expiration time setting.
-	 *
-	 * @since    1.0.0
-	 * @access 	 public
-	 */
-	public static function save_default_expire_time(){
-		global $wpdb;
-
-		/*
-			Gets the default expiration time set
-			by the user.
-		*/
-		$expirationTime = $_POST['expiration_time'];
-
-		/*
-			If it's a multisite install, switch
-			the blog and update the values
-		*/
-		if( is_multisite() ){
-			/*
-				Get the current blog ID
-			*/
 			$currentBlogID = get_current_blog_id();
 
 			global $switched;
 			switch_to_blog(1);
 
 			/*
-				Update the default expire time for the specific blog.
+				Update the public access setting for the specific blog.
 			*/
 			$wpdb->query( $wpdb->prepare(
-				"UPDATE ".$wpdb->prefix."wps_settings 
-				SET setting_value = '%s' 
-				WHERE setting_name = 'Default Expiration Time' 
+				"UPDATE ".$wpdb->prefix."wps_settings
+				SET enabled = '%d'
 				AND blog_id = '%d'",
-				$expirationTime,
+				$enabled,
 				$currentBlogID
 			) );
-			
+
 			restore_current_blog();
 		}else{
 			/*
-				Update the default expire time
+				Update the public access setting
 			*/
 			$wpdb->query( $wpdb->prepare(
-				"UPDATE ".$wpdb->prefix."wps_settings 
-				SET setting_value = '%s' 
-				WHERE setting_name = 'Default Expiration Time'",
-				$expirationTime
+				"UPDATE ".$wpdb->prefix."wps_settings
+				SET enabled = '%d'",
+				$enabled
 			) );
 		}
 
-		/*
-			Return the udpated expiration time.
-		*/
-		return $expirationTime;
+		die();
 	}
+
 
 	/**
 	 * Gets the expiration time as a certain date in the future
@@ -191,7 +122,7 @@ class WP_Sandbox_Settings{
 		if( get_option('timezone_string') != '' ){
 			date_default_timezone_set( get_option('timezone_string') );
 		}
-		
+
 		switch( $expiration ){
 			case 'day':
 				return date('Y-m-d G:i:s', time() + '86400');
@@ -201,7 +132,7 @@ class WP_Sandbox_Settings{
 			break;
 			case 'twoweeks':
 				return date('Y-m-d G:i:s', time() + '1209600');
-			break;	
+			break;
 			case 'month':
 				return date('Y-m-d G:i:s', time() + '2592000');
 			break;
@@ -240,9 +171,8 @@ class WP_Sandbox_Settings{
 				Update the public access setting for the specific blog.
 			*/
 			$wpdb->query( $wpdb->prepare(
-				"UPDATE ".$wpdb->prefix."wps_settings 
-				SET setting_value = '%d' 
-				WHERE setting_name = 'Enabled' 
+				"UPDATE ".$wpdb->prefix."wps_settings
+				SET enabled = '%d'
 				AND blog_id = '%d'",
 				$publicAccess,
 				$currentBlogID
@@ -254,61 +184,13 @@ class WP_Sandbox_Settings{
 				Update the public access setting
 			*/
 			$wpdb->query( $wpdb->prepare(
-				"UPDATE ".$wpdb->prefix."wps_settings 
-				SET setting_value = '%d' 
-				WHERE setting_name = 'Enabled'",
+				"UPDATE ".$wpdb->prefix."wps_settings
+				SET enabled = '%d'",
 				$publicAccess
 			) );
 		}
 
 		return $publicAccess;
-	}
-
-	/**
-	 * Returns the default expiration time for the site.
-	 *
-	 * @since    1.0.0
-	 * @access 	 public
-	 */
-	public static function get_default_expiration_time(){
-		global $wpdb;
-
-		/*
-			If the site is multi site get the default expiration time
-		*/
-		if( is_multisite() ){
-			$currentBlogID = get_current_blog_id();
-
-			global $switched;
-			switch_to_blog(1);
-
-			/*
-				Sets the default expiration time on the blog.
-			*/
-			$defaultExpirationTime = $wpdb->get_results( $wpdb->prepare(
-				"SELECT setting_value
-				 FROM ".$wpdb->prefix."wps_settings 
-				 WHERE setting_name = 'Default Expiration Time' 
-				 AND blog_id = '%d'",
-				 $currentBlogID
-			), ARRAY_A );
-
-			restore_current_blog();
-		}else{
-			/*
-				Sets the default expiration time.
-			*/
-			$defaultExpirationTime = $wpdb->get_results(
-				"SELECT setting_value 
-				FROM ".$wpdb->prefix."wps_settings 
-				WHERE setting_name = 'Default Expiration Time'",
-				ARRAY_A );
-		}
-
-		/*
-			Returns the default expiration time
-		*/
-		return $defaultExpirationTime[0]['setting_value'];
 	}
 
 	/**
@@ -319,7 +201,7 @@ class WP_Sandbox_Settings{
 	 */
 	public static function get_plugin_status(){
 		global $wpdb;
-		
+
 		/*
 			If the site is multisite we get the plugin status
 		*/
@@ -333,9 +215,8 @@ class WP_Sandbox_Settings{
 				Gets the plugin status for the blog
 			*/
 			$pluginStatus = $wpdb->get_results( $wpdb->prepare(
-				"SELECT setting_value
-				 FROM ".$wpdb->prefix."wps_settings 
-				 WHERE setting_name = 'Enabled' 
+				"SELECT enabled
+				 FROM ".$wpdb->prefix."wps_settings
 				 AND blog_id = '%d'",
 				 $currentBlogID
 			), ARRAY_A );
@@ -346,67 +227,17 @@ class WP_Sandbox_Settings{
 				Gets the plugin status.
 			*/
 			$pluginStatus = $wpdb->get_results(
-				"SELECT setting_value 
-				 FROM ".$wpdb->prefix."wps_settings 
-				 WHERE setting_name = 'Enabled'",
+				"SELECT enabled
+				 FROM ".$wpdb->prefix."wps_settings",
 				ARRAY_A );
 		}
 
 		/*
 			Returns the setting value
 		*/
-		return $pluginStatus[0]['setting_value'];
+		return $pluginStatus[0]['enabled'];
 	}
 
-	/**
-	 * Returns the plugin page.
-	 *
-	 * @since    1.0.0
-	 * @access 	 public
-	 */
-	public static function get_default_page(){
-		global $wpdb;
-
-		/*
-			If the setup is multisite, get the default page for the blog.
-		*/
-		if( is_multisite() ){
-			$currentBlogID = get_current_blog_id();
-
-			global $switched;
-			switch_to_blog(1);
-
-			/*
-				Get the default page for the plugin for un authorized users.
-			*/
-			$defaultPage = $wpdb->get_results( $wpdb->prepare(
-				"SELECT setting_value
-				 FROM ".$wpdb->prefix."wps_settings 
-				 WHERE setting_name = 'Default Page' 
-				 AND blog_id = '%d'",
-				 $currentBlogID
-			), ARRAY_A );
-
-			/*
-				Restores the current blog game pack.
-			*/
-			restore_current_blog();
-		}else{
-			/*
-				Get the default page for the plugin for un authorized users.
-			*/
-			$defaultPage = $wpdb->get_results(
-				"SELECT setting_value 
-				 FROM ".$wpdb->prefix."wps_settings 
-				 WHERE setting_name = 'Default Page'",
-				ARRAY_A );
-		}
-
-		/*
-			Returns the setting value
-		*/
-		return $defaultPage[0]['setting_value'];
-	}
 
 	/**
 	 * Returns all of the settings for the site.
@@ -433,7 +264,7 @@ class WP_Sandbox_Settings{
 			/*
 				Get all the settings for the current blog.
 			*/
-			$allSettings = $wpdb->get_results( $wpdb->prepare( 
+			$allSettings = $wpdb->get_results( $wpdb->prepare(
 				"SELECT * FROM ".$wpdb->prefix."wps_settings
 				WHERE blog_id = '%d'",
 				$currentBlogID
@@ -448,16 +279,16 @@ class WP_Sandbox_Settings{
 				Get all of the settings.
 			*/
 			$allSettings = $wpdb->get_results(
-				"SELECT * 
-				FROM ".$wpdb->prefix."wps_settings", 
+				"SELECT *
+				FROM ".$wpdb->prefix."wps_settings",
 				ARRAY_A );
 		}
-		
+
 		return $allSettings;
 	}
 
 	/**
-	 * Gets all enabled sites on a network install. Only called from the 
+	 * Gets all enabled sites on a network install. Only called from the
 	 * network admin screen so we asssume it's a multisite install.
 	 *
 	 * @since    1.0.0
@@ -475,10 +306,10 @@ class WP_Sandbox_Settings{
 		/*
 			Get all of the enabled statuses for the site
 		*/
-		$enabledSites = $wpdb->get_results( 
-			"SELECT * 
-			 FROM ".$wpdb->prefix."wps_settings 
-			 WHERE setting_name = 'Enabled'",
+		$enabledSites = $wpdb->get_results(
+			"SELECT `blog_id`
+			 FROM ".$wpdb->prefix."wps_settings
+			 WHERE `enabled` = '1'",
 			 ARRAY_A);
 
 		/*
@@ -526,9 +357,8 @@ class WP_Sandbox_Settings{
 			*/
 			$wpdb->query( $wpdb->prepare(
 				"UPDATE ".$wpdb->prefix."wps_settings
-				 SET setting_value = '%d'
-				 WHERE setting_name = 'Enabled'
-				 AND blog_id = '%d'",
+				 SET `enabled` = '%d'
+				 WHERE blog_id = '%d'",
 				 $enabled,
 				 $blogID
 			) );
@@ -540,5 +370,65 @@ class WP_Sandbox_Settings{
 		restore_current_blog();
 
 		die();
+	}
+
+	public static function update_design(){
+		global $wpdb;
+
+		/*
+			If the site is multisite, get all of the settings for
+			the individual blog.
+		*/
+		if( is_multisite() ){
+			/*
+				Get the current blog ID
+			*/
+			$currentBlogID = get_current_blog_id();
+
+			global $switched;
+			switch_to_blog(1);
+
+
+
+			/*
+				Restores the current blog
+			*/
+			restore_current_blog();
+		}else{
+
+			$wpdb->query( $wpdb->prepare(
+				"UPDATE ".$wpdb->prefix."wps_settings
+				 SET `logo` = %s,
+				 `main_title` = %s,
+				 `sub_title` = %s,
+				 `show_login_link` = %s,
+				 `background_color_1` = %s,
+				 `background_color_2` = %s,
+				 `twitter_url` = %s,
+				 `facebook_url` = %s,
+				 `google_plus_url` = %s,
+				 `instagram_url` = %s,
+				 `vimeo_url` = %s,
+				 `dribbble_url` = %s,
+				 `youtube_url` = %s",
+				 $_POST['logo'],
+				 $_POST['main_title'],
+				 $_POST['sub_title'],
+				 $_POST['show_login_link'] == 'on' ? 1 : 0,
+				 $_POST['background_color_1'],
+				 $_POST['background_color_2'],
+				 $_POST['twitter'],
+				 $_POST['facebook'],
+				 $_POST['google_plus'],
+				 $_POST['instagram'],
+				 $_POST['vimeo'],
+				 $_POST['dribbble'],
+				 $_POST['youtube']
+			) );
+
+		}
+
+		die();
+
 	}
 }

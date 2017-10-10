@@ -84,7 +84,7 @@ class WP_Sandbox_Database_Management {
 	 */
 	private function build_authenticated_users_table(){
 		global $wpdb;
-		
+
 		/*
 			Switch to the top level blog from multisite.
 		*/
@@ -110,7 +110,7 @@ class WP_Sandbox_Database_Management {
 		  `first_login` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
 		  PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1';
-		
+
 		/*
 			Run the query to build the authenticated users table.
 		*/
@@ -132,7 +132,7 @@ class WP_Sandbox_Database_Management {
 	 */
 	private function build_settings_table(){
 		global $wpdb;
-		
+
 		/*
 			Switch to the top level blog from multisite.
 		*/
@@ -152,8 +152,21 @@ class WP_Sandbox_Database_Management {
 		$wpsSettingsTable = 'CREATE TABLE IF NOT EXISTS `'.$wpsSettingsName.'` (
 		  `id` int(11) NOT NULL AUTO_INCREMENT,
 		  `blog_id` int(11) DEFAULT NULL,
-		  `setting_name` varchar(50) NOT NULL,
-		  `setting_value` text NOT NULL,
+		  `preview_hash` varchar(50) NOT NULL,
+		  `enabled` int(1) DEFAULT \'1\',
+			`logo` text NULL,
+			`main_title` varchar(255) NULL,
+			`sub_title` varchar(255) NULL,
+			`show_login_link` int(1) DEFAULT 0,
+			`background_color_1` varchar(7) DEFAULT \'#5CCCF0\',
+			`background_color_2` varchar(7) DEFAULT \'#3884E8\',
+			`twitter_url` text NULL,
+			`facebook_url` text NULL,
+			`google_plus_url` text NULL,
+			`instagram_url` text NULL,
+			`vimeo_url` text NULL,
+			`dribbble_url` text NULL,
+			`youtube_url` text NULL,
 		  PRIMARY KEY (`id`)
 		) ENGINE=InnoDB DEFAULT CHARSET=utf8 AUTO_INCREMENT=1 ;';
 
@@ -178,7 +191,7 @@ class WP_Sandbox_Database_Management {
 	 */
 	private function build_ips_table(){
 		global $wpdb;
-		
+
 		/*
 			Switch to the top level blog from multisite.
 		*/
@@ -225,7 +238,7 @@ class WP_Sandbox_Database_Management {
 	 */
 	private function build_ip_ranges_table(){
 		global $wpdb;
-		
+
 		/*
 			Switch to the top level blog from multisite.
 		*/
@@ -273,7 +286,7 @@ class WP_Sandbox_Database_Management {
 	 */
 	private function build_subnets_table(){
 		global $wpdb;
-		
+
 		/*
 			Switch to the top level blog from multisite.
 		*/

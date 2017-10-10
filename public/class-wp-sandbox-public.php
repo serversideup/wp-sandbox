@@ -101,8 +101,8 @@ class WP_Sandbox_Public {
 					'parent' => false, 
 					'id' => 'wp-sandbox-admin-bar-notification',
 					'title' => __( 'WP Sandbox Enabled' ),
-					'href' => admin_url( 'admin.php?page=wp_sandbox' ),
-					'meta' => array( 'class' => 'ab-top-secondary wps-admin-bar-enabled' )
+					'href' => admin_url( 'options-general.php?page=wp_sandbox_settings' ),
+					'meta' => array( 'class' => 'ab-top-secondary wp-sandbox-admin-bar-enabled' )
 				));
 			}else{
 				/*
@@ -117,8 +117,8 @@ class WP_Sandbox_Public {
 					'parent' => false, 
 					'id' => 'wp-sandbox-admin-bar-notification',
 					'title' => __( 'WP Sandbox Disabled' ),
-					'href' => admin_url( 'admin.php?page=wp_sandbox' ),
-					'meta' => array( 'class' => 'ab-top-secondary wps-admin-bar-disabled' )
+					'href' => admin_url( 'options-general.php?page=wp_sandbox_settings' ),
+					'meta' => array( 'class' => 'ab-top-secondary wp-sandbox-admin-bar-disabled' )
 				));
 			}
 		}

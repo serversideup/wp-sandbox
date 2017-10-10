@@ -33,7 +33,7 @@ class WP_Sandbox_Authenticated_Users{
 
 		/*
 			If multisite we get all of the
-			authenticated users for the current 
+			authenticated users for the current
 			blog.
 		*/
 		if( is_multisite() ){
@@ -49,7 +49,7 @@ class WP_Sandbox_Authenticated_Users{
 				Get all of the authenticated users
 			*/
 			$authenticatedUsers = $wpdb->get_results( $wpdb->prepare(
-				"SELECT * FROM ".$wpdb->prefix."wps_authenticated_users 
+				"SELECT * FROM ".$wpdb->prefix."wps_authenticated_users
 				WHERE blog_id = '%d'",
 				$currentBlogID
 			), ARRAY_A );
@@ -62,8 +62,8 @@ class WP_Sandbox_Authenticated_Users{
 			/*
 				Gets all of the authenticated users.
 			*/
-			$authenticatedUsers = $wpdb->get_results( 
-				"SELECT * 
+			$authenticatedUsers = $wpdb->get_results(
+				"SELECT *
 				 FROM ".$wpdb->prefix."wps_authenticated_users",
 			ARRAY_A );
 		}
@@ -92,7 +92,7 @@ class WP_Sandbox_Authenticated_Users{
 				Gets the blog ID for the current blog.
 			*/
 			$currentBlogID = get_current_blog_id();
-			
+
 			/*
 				Switches to the top level blog
 			*/
@@ -102,7 +102,7 @@ class WP_Sandbox_Authenticated_Users{
 			/*
 				Deletes the authenticated user from the blog.
 			*/
-			$wpdb->query( $wpdb->prepare( 
+			$wpdb->query( $wpdb->prepare(
 				"DELETE FROM ".$wpdb->prefix."wps_authenticated_users
 				 WHERE id = '%d'
 				 AND blog_id = '%d'",
@@ -118,7 +118,7 @@ class WP_Sandbox_Authenticated_Users{
 			/*
 				Deletes the authenticated user from the blog.
 			*/
-			$wpdb->query( $wpdb->prepare( 
+			$wpdb->query( $wpdb->prepare(
 				"DELETE FROM ".$wpdb->prefix."wps_authenticated_users
 				 WHERE id = '%d'",
 				 $authenticatedUserID

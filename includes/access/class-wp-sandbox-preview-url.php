@@ -52,9 +52,8 @@ class WP_Sandbox_Preview_URL{
 			*/
 			$wpdb->query( $wpdb->prepare(
 				"UPDATE ".$wpdb->prefix."wps_settings
-				SET setting_value = '%s'
-				WHERE blog_id = '%d'
-				AND setting_name = 'Preview Hash'",
+				SET preview_hash = '%s'
+				WHERE blog_id = '%d'",
 				$previewHash,
 				$currentBlogID
 			) );
@@ -66,8 +65,7 @@ class WP_Sandbox_Preview_URL{
 			*/
 			$wpdb->query( $wpdb->prepare(
 				"UPDATE ".$wpdb->prefix."wps_settings
-				SET setting_value = '%s'
-				WHERE setting_name = 'Preview Hash'",
+				SET preview_hash = '%s'",
 				$previewHash
 			) );
 		}
@@ -90,7 +88,7 @@ class WP_Sandbox_Preview_URL{
 		/*
 			If the install is multisite,
 			we grab the preview hash from the
-			blog id 
+			blog id
 		*/
 		if( is_multisite() ){
 			$currentBlogID = get_current_blog_id();
@@ -102,10 +100,9 @@ class WP_Sandbox_Preview_URL{
 				Get the preview hash for the current site.
 			*/
 			$previewHashResult = $wpdb->get_results( $wpdb->prepare(
-				"SELECT setting_value
+				"SELECT preview_hash
 				 FROM ".$wpdb->prefix."wps_settings
-				 WHERE blog_id = '%d'
-				 AND setting_name = 'Preview Hash'",
+				 WHERE blog_id = '%d'",
 				 $currentBlogID
 			), ARRAY_A );
 
@@ -114,13 +111,13 @@ class WP_Sandbox_Preview_URL{
 			/*
 				Get the preview hash
 			*/
-			$previewHashResult = $wpdb->get_results( "SELECT setting_value FROM ".$wpdb->prefix."wps_settings WHERE setting_name = 'Preview Hash'", ARRAY_A );
+			$previewHashResult = $wpdb->get_results( "SELECT preview_hash FROM ".$wpdb->prefix."wps_settings", ARRAY_A );
 		}
 
 		/*
 			Returns the preview hash.
 		*/
-		return $previewHashResult[0]['setting_value'];
+		return $previewHashResult[0]['preview_hash'];
 	}
 
 	/**
@@ -164,17 +161,10 @@ class WP_Sandbox_Preview_URL{
 				$defaultExpirationTime = WP_Sandbox_Settings::get_default_expiration_time();
 
 				/*
-					If never, then the cookie is set to expire
-					in 10 years.
+					Sets a cookie that expires 10 years in the future
 				*/
-				if( $defaultExpirationTime == 'never' ){
-					setcookie( 'wp-sandbox-preview-hash', $hash, time() + (10 * 365 * 24 * 60 * 60), '/' );
-				}else{
-					$futureTimestamp = self::get_future_timestamp( $defaultExpirationTime );
+				setcookie( 'wp-sandbox-preview-hash', $hash, time() + (10 * 365 * 24 * 60 * 60), '/' );
 
-					setcookie( 'wp-sandbox-preview-hash', $hash, $futureTimestamp, '/' );
-				}
-				
 				return true;
 			}else{
 				return false;
@@ -231,19 +221,10 @@ class WP_Sandbox_Preview_URL{
 		if( !isset( $_COOKIE['wp-sandbox-preview-hash'] ) ){
 			$previewHash = self::get_preview_hash();
 
-			$defaultExpirationTime = WP_Sandbox_Settings::get_default_expiration_time();
-
 			/*
-				If never, then the cookie is set to expire
-				in 10 years.
+				Sets a cookie for 10 years from now (never expires)
 			*/
-			if( $defaultExpirationTime == 'never' ){
-				setcookie( 'wp-sandbox-preview-hash', $previewHash, time() + (10 * 365 * 24 * 60 * 60), '/' );
-			}else{
-				$futureTimestamp = self::get_future_timestamp( $defaultExpirationTime );
-
-				setcookie( 'wp-sandbox-preview-hash', $previewHash, $futureTimestamp, '/' );
-			}
+			setcookie( 'wp-sandbox-preview-hash', $previewHash, time() + (10 * 365 * 24 * 60 * 60), '/' );
 		}
 	}
 
@@ -274,7 +255,7 @@ class WP_Sandbox_Preview_URL{
 			break;
 			case 'twoweeks':
 				return strtotime( '+2 weeks', time() );
-			break;	
+			break;
 			case 'month':
 				return strtotime( '+1 month', time() );
 			break;

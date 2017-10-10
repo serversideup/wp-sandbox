@@ -2,3 +2,110 @@
  * All of the CSS for your public-facing functionality should be
  * included in this file.
  */
+ /* http://meyerweb.com/eric/tools/css/reset/
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+  font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+div#wp-sandbox-coming-soon-template{
+   height: 100vh;
+   overflow: auto;
+   position: relative;
+}
+
+div#wp-sandbox-coming-soon-template div#wp-sandbox-coming-soon-template-container{
+ position: absolute;
+ top: 50%;
+ transform: translateY(-50%);
+ width: 100%;
+}
+
+div#wp-sandbox-coming-soon-template img#wp-sandbox-coming-soon-template-logo{
+ max-width: 300px;
+ margin: auto;
+ display: block;
+ margin-bottom: 20px;
+}
+
+div#wp-sandbox-coming-soon-template h2#wp-sandbox-coming-soon-template-header{
+   color: white;
+   font-weight: bold;
+   text-align: center;
+   font-size: 42px;
+   line-height: 80px;
+}
+
+div#wp-sandbox-coming-soon-template h3#wp-sandbox-coming-soon-template-sub-header{
+   color: white;
+   font-size: 16px;
+   text-align: center;
+   margin-bottom: 20px;
+}
+
+div#wp-sandbox-social-icon-container{
+ text-align: center;
+}
+
+span#wp-sandbox-coming-soon-template-login{
+ display: block;
+ color: white;
+ font-size: 16px;
+ text-align: center;
+ margin-top: 100px;
+}
+
+span#wp-sandbox-coming-soon-template-login a{
+ color: white;
+ text-decoration: underline;
+}
+
+div#wp-sandbox-social-icon-container img{
+ display: inline-block;
+ margin-left: 20px;
+ margin-right: 20px;
+}

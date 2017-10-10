@@ -28,97 +28,19 @@
 			global $wpdb;
 
 			/*
-				Adds default page placeholder in the settings table
+				Generates the initial preview hash
 			*/
-			$checkDefaultWPSPage = $wpdb->get_results( 
-				"SELECT setting_value
-				 FROM ".$wpdb->prefix."wps_settings
-				 WHERE setting_name = 'Default Page'",
-				 ARRAY_A
-			);
+			$hash = WP_Sandbox_Preview_URL::generate_preview_hash();
 
 			/*
-				If the default page is empty, insert the default.
+				Inserts the default settings for the plugin.
 			*/
-			if( empty( $checkDefaultWPSPage ) ){
-				$wpdb->query(
-					"INSERT INTO ".$wpdb->prefix."wps_settings 
-					(setting_name, setting_value) 
-					VALUES ('Default Page', '404')"
-					);
-			}
-
-			/*
-				Adds default expiration time for user's authenticated
-				IP in settings table and defaults it to never.
-			*/
-			$checkDefaultWPSExpire = $wpdb->get_results(
-				"SELECT setting_value 
-				 FROM ".$wpdb->prefix."wps_settings 
-				 WHERE setting_name = 'Default Expiration Time'",
-				 ARRAY_A
-			);
-
-			/*
-				If the default expiration time is empty, add the
-				default expiration time.
-			*/
-			if( empty( $checkDefaultWPSExpire ) ){
-				$wpdb->query(
-					"INSERT INTO ".$wpdb->prefix."wps_settings 
-					 (setting_name, setting_value) 
-					 VALUES ('Default Expiration Time', 'never')"
-				);
-			}
-
-			/*
-				Generates and adds the Preview URL hash to the 
-				settings table
-			*/
-			$checkDefaultWPSHash = $wpdb->get_results(
-				"SELECT setting_value 
-				 FROM ".$wpdb->prefix."wps_settings 
-				 WHERE setting_name = 'Preview Hash'",
-				 ARRAY_A
-			);
-
-			/*
-				If the default hash is empty, add a preview
-				hash
-			*/
-			if( empty( $checkDefaultWPSHash ) ){
-				$hash = WP_Sandbox_Preview_URL::generate_preview_hash();
-
-				$wpdb->query( $wpdb->prepare(
-					"INSERT INTO ".$wpdb->prefix."wps_settings 
-					 (setting_name, setting_value) 
-					 VALUES ('Preview Hash', '%s')",
-					 $hash
-				) );
-			}
-
-			/*
-				Adds a default setting for the status of the plugin and defaults
-				it to 0 which means disabled.
-			*/
-			$checkEnabled = $wpdb->get_results(
-				"SELECT setting_value 
-				 FROM ".$wpdb->prefix."wps_settings 
-				 WHERE setting_name = 'Enabled'",
-				 ARRAY_A 
-			);
-
-			/*
-				If the plugin enabled is empty, add the default plugin enabled
-				setting.
-			*/
-			if( empty( $checkEnabled ) ){
-				$wpdb->query(
-					"INSERT INTO ".$wpdb->prefix."wps_settings 
-					 (setting_name, setting_value) 
-					 VALUES ('Enabled', '0')"
-				);
-			}
+			$wpdb->query( $wpdb->prepare(
+				"INSERT INTO ".$wpdb->prefix."wps_settings
+				(`preview_hash`, `enabled` )
+				VALUES ('%s', '1')",
+				$hash
+			) );
 		}
 
 		/**
@@ -138,7 +60,7 @@
 				The wp_get_sites is the new version of the
 				function.
 
-				Builds an array of all the blogs on the 
+				Builds an array of all the blogs on the
 				multisite install.
 			*/
 			$blogList = array();
@@ -177,23 +99,23 @@
 
 			global $switched;
 			switch_to_blog(1);
-			
+
 			/*
 				Iterates through all of the blogs and
 				sets the default settings. This ensures
 				the settings are the same for all blogs
-				on install.  Each blog is managed 
+				on install.  Each blog is managed
 				individually.
 			*/
 			foreach( $blogList as $blogID ){
 				/*
 					Adds placeholder for default page setting
 				*/
-				$checkDefaultWPSPage = $wpdb->get_results( $wpdb->prepare( 
-					"SELECT setting_value 
-					 FROM ".$wpdb->prefix."wps_settings 
-					 WHERE setting_name = 'Default Page' 
-					 AND blog_id = '%d'", 
+				$checkDefaultWPSPage = $wpdb->get_results( $wpdb->prepare(
+					"SELECT setting_value
+					 FROM ".$wpdb->prefix."wps_settings
+					 WHERE setting_name = 'Default Page'
+					 AND blog_id = '%d'",
 					 $blogID
 				), ARRAY_A );
 
@@ -203,36 +125,11 @@
 				*/
 				if( empty( $checkDefaultWPSPage ) ){
 					$wpdb->query( $wpdb->prepare(
-						"INSERT INTO ".$wpdb->prefix."wps_settings 
-						(blog_id, setting_name, setting_value) 
+						"INSERT INTO ".$wpdb->prefix."wps_settings
+						(blog_id, setting_name, setting_value)
 						VALUES ('%d', 'Default Page', '404')",
 						$blogID
 					) );
-				}
-
-				/*
-					Adds default setting for authenticated user
-					expiration time and sets it to never
-				*/
-				$checkDefaultWPSExpire = $wpdb->get_results( $wpdb->prepare(
-					"SELECT setting_value 
-					 FROM ".$wpdb->prefix."wps_settings 
-					 WHERE setting_name = 'Default Expiration Time' 
-					 AND blog_id = '%d'",
-					 $blogID
-				), ARRAY_A );
-
-				/*
-					If the default expire is not set on the blog, add a default
-					expire setting.
-				*/
-				if( empty( $checkDefaultWPSExpire ) ){
-					$wpdb->query( $wpdb->prepare(
-						"INSERT INTO ".$wpdb->prefix."wps_settings 
-						(blog_id, setting_name, setting_value) 
-						VALUES ('%d', 'Default Expiration Time', 'never')",
-						$blogID
-					), ARRAY_A );
 				}
 
 				/*
@@ -240,9 +137,9 @@
 					for each blog.
 				*/
 				$checkDefaultWPSHash = $wpdb->get_results( $wpdb->prepare(
-					"SELECT setting_value 
-					 FROM ".$wpdb->prefix."wps_settings 
-					 WHERE setting_name = 'Preview Hash' 
+					"SELECT setting_value
+					 FROM ".$wpdb->prefix."wps_settings
+					 WHERE setting_name = 'Preview Hash'
 					 AND blog_id = '%d'",
 					 $blogID
 				), ARRAY_A );
@@ -256,8 +153,8 @@
 					$hash = WP_Sandbox_Preview_URL::generate_preview_hash();
 
 					$wpdb->query( $wpdb->prepare(
-						"INSERT INTO ".$wpdb->prefix."wps_settings 
-						(blog_id, setting_name, setting_value) 
+						"INSERT INTO ".$wpdb->prefix."wps_settings
+						(blog_id, setting_name, setting_value)
 						VALUES ('%d', 'Preview Hash', '%s')",
 						$blogID,
 						$hash
@@ -269,9 +166,9 @@
 					it to 0 which means disabled.
 				*/
 				$checkEnabled = $wpdb->get_results( $wpdb->prepare(
-					"SELECT setting_value 
-					 FROM ".$wpdb->prefix."wps_settings 
-					 WHERE setting_name = 'Enabled' 
+					"SELECT setting_value
+					 FROM ".$wpdb->prefix."wps_settings
+					 WHERE setting_name = 'Enabled'
 					 AND blog_id = '%d'",
 					 $blogID
 				), ARRAY_A );
@@ -282,8 +179,8 @@
 				*/
 				if( empty( $checkEnabled ) ){
 					$wpdb->query( $wpdb->prepare(
-						"INSERT INTO ".$wpdb->prefix."wps_settings 
-						 (blog_id, setting_name, setting_value) 
+						"INSERT INTO ".$wpdb->prefix."wps_settings
+						 (blog_id, setting_name, setting_value)
 						 VALUES ('%d', 'Enabled', '0')",
 						 $blogID
 					) );
@@ -305,35 +202,25 @@
 
 			global $switched;
 			switch_to_blog(1);
-			
+
 			/*
 				Gets the newest blog
 			*/
-			$newestBlog = $wpdb->get_results( 
-							"SELECT blog_id 
-							 FROM ".$wpdb->prefix."blogs 
-							 ORDER BY blog_id DESC", 
+			$newestBlog = $wpdb->get_results(
+							"SELECT blog_id
+							 FROM ".$wpdb->prefix."blogs
+							 ORDER BY blog_id DESC",
 							 ARRAY_A );
 
 			$blogID = $newestBlog[0]['blog_id'];
-			
+
 			/*
 				Adds default page setting
 			*/
 			$wpdb->query( $wpdb->prepare(
-				"INSERT INTO ".$wpdb->prefix."wps_settings 
-				 (blog_id, setting_name) 
+				"INSERT INTO ".$wpdb->prefix."wps_settings
+				 (blog_id, setting_name)
 				 VALUES ('%d', 'Default Page')",
-				 $blogID
-			) );
-
-			/*
-				Adds default expiration time setting
-			*/
-			$wpdb->query( $wpdb->prepare(
-				"INSERT INTO ".$wpdb->prefix."wps_settings 
-				 (blog_id, setting_name, setting_value) 
-				 VALUES ('%d', 'Default Expiration Time', 'never')",
 				 $blogID
 			) );
 
@@ -341,10 +228,10 @@
 				Generates and adds preview hash setting
 			*/
 			$hash = WP_Sandbox_Preview_URL::generate_preview_hash();
-			
+
 			$wpdb->query( $wpdb->prepare(
-				"INSERT INTO ".$wpdb->prefix."wps_settings 
-				 (blog_id, setting_name, setting_value) 
+				"INSERT INTO ".$wpdb->prefix."wps_settings
+				 (blog_id, setting_name, setting_value)
 				 VALUES ('%d', 'Preview Hash', '%s')",
 				 $blogID,
 				 $hash
@@ -354,8 +241,8 @@
 				Adds site enabled setting
 			*/
 			$wpdb->query( $wpdb->prepare(
-				"INSERT INTO ".$wpdb->prefix."wps_settings 
-				(blog_id, setting_name, setting_value) 
+				"INSERT INTO ".$wpdb->prefix."wps_settings
+				(blog_id, setting_name, setting_value)
 				VALUES ('%d', 'Enabled', '0')",
 				$blogID
 			) );
@@ -417,7 +304,7 @@
 				 WHERE blog_id = '%d'",
 				 $blogID
 			) );
-			
+
 			/*
 				Deletes all settings
 				for the deleted blog.
@@ -427,7 +314,7 @@
 				 WHERE blog_id = '%d'",
 				 $blogID
 			) );
-			
+
 			restore_current_blog();
 		}
 	}

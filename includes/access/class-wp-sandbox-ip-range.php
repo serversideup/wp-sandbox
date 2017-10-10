@@ -68,12 +68,12 @@ class WP_Sandbox_IP_Range{
 	/**
 	 * Adds an IP Range
 	 *
-	 * @since      1.0.0
-	 * @access     public
-	 * @var 	   string 		$startIP 		The beginning of the IP Range
-	 * @var 	   string 		$endIP 			The end of the IP Range
-	 * @var 	   string 		$expiration		The time the IP Range expires
-	 * @var 	   int 			$userID 		The ID of the user adding the range.
+	 * @since      	1.0.0
+	 * @access     	public
+	 * @var 	   		string 		$startIP 		The beginning of the IP Range
+	 * @var 	   		string 		$endIP 			The end of the IP Range
+	 * @var 	   		string 		$expiration		The time the IP Range expires
+	 * @var 	  	 	int 			$userID 		The ID of the user adding the range.
 	 */
 	public static function add_range( $startIP, $endIP, $expiration, $userID ){
 		global $wpdb;
@@ -131,13 +131,13 @@ class WP_Sandbox_IP_Range{
 	/**
 	 * Deletes an IP range
 	 *
-	 * @since      1.0.0
-	 * @access     public
-	 * @var 	   int			$rangeID 		The ID of the range being deleted
+	 * @since      	1.0.0
+	 * @access     	public
+	 * @var 	   		int			$rangeID 		The ID of the range being deleted
 	 */
 	public static function delete_range( $rangeID ){
 		global $wpdb;
-		
+
 		/*
 			If multisite, we switch to the top level blog
 		*/
@@ -170,10 +170,10 @@ class WP_Sandbox_IP_Range{
 	/**
 	 * Checks to see if the IP address is in a valid range of IPs.
 	 * Help from: http://stackoverflow.com/questions/18336908/php-check-if-ip-address-is-in-a-range-of-ip-addresses
-	 * 
-	 * @since      1.0.0
-	 * @access     public
-	 * @var 	   int			$rangeID 		The ID of the range being deleted
+	 *
+	 * @since      	1.0.0
+	 * @access     	public
+	 * @var 	   		int			$rangeID 		The ID of the range being deleted
 	 */
 	public static function check_valid_ip_range( $ipAddress ){
 		global $wpdb;
@@ -195,12 +195,12 @@ class WP_Sandbox_IP_Range{
 				Gets IP ranges
 			*/
 			$ipRanges = $wpdb->get_results( $wpdb->prepare(
-				"SELECT * 
+				"SELECT *
 				 FROM ".$wpdb->prefix."wps_ip_ranges
 				 WHERE blog_id = '%d'",
 				 $currentBlogID
 			), ARRAY_A );
-			
+
 			restore_current_blog();
 		}else{
 			/*
@@ -209,19 +209,19 @@ class WP_Sandbox_IP_Range{
 			$ipRanges = $wpdb->get_results( "SELECT * FROM ".$wpdb->prefix."wps_ip_ranges", ARRAY_A );
 
 		}
-		
+
 		/*
 			Loops through all of the IP Ranges
 			to see if the ip address is within
 			range.
 		*/
 		foreach( $ipRanges as $ipRange ){
-	        $min    = ip2long($ipRange['start_ip']);
+				$min    = ip2long($ipRange['start_ip']);
     		$max    = ip2long($ipRange['end_ip']);
-    		$needle = ip2long($ipAddress);  
+    		$needle = ip2long($ipAddress);
 
     		/*
-				If the IP is in a range, then return true.
+					If the IP is in a range, then return true.
     		*/
     		if( ( $needle >= $min ) AND ( $needle <= $max ) ){
     			return true;
@@ -235,9 +235,9 @@ class WP_Sandbox_IP_Range{
 	}
 
 	/**
-	 * Gets all network authenticated ips. This is only called from a 
+	 * Gets all network authenticated ips. This is only called from a
 	 * multisite instance so we know it's multisite.
-	 * 
+	 *
 	 * @since      1.0.0
 	 * @access     public
 	 */
