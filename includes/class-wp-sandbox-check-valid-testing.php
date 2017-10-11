@@ -303,7 +303,7 @@ class WP_Sandbox_Check_Valid_Testing{
 		global $wpdb;
 
 		$settings = WP_Sandbox_Settings::get_all_settings();
-		
+
 		require WP_PLUGIN_DIR .'/wp-sandbox/public/partials/wp-sandbox-public-display.php';
 
 		exit;

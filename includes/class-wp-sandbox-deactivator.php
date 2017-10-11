@@ -31,7 +31,22 @@ class WP_Sandbox_Deactivator {
 	 */
 	public static function deactivate() {
 		$databaseManagement = new WP_Sandbox_Database_Management();
-		$databaseManagement->destroy_tables();
+
+		if( is_multisite() ){
+			$referringURL = wp_get_referer();
+
+			/*
+				If network activating the plugin, we have to destroy all the data for the
+				Wordpress sites
+			*/
+			if( strpos( $referringURL, '/wp-admin/network/plugins.php' ) !== false ){
+				$databaseManagement->destroy_tables();
+			}else{
+				$databaseManagement->delete_deactivated_data();
+			}
+		}else{
+			$databaseManagement->destroy_tables();
+		}
 	}
 
 }

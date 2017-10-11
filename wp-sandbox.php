@@ -55,7 +55,7 @@ register_activation_hook( __FILE__, 'activate_wp_sandbox' );
 register_deactivation_hook( __FILE__, 'deactivate_wp_sandbox' );
 
 /**
- * Defines the directory for the plugin to use for including files. 
+ * Defines the directory for the plugin to use for including files.
  */
 define( 'WP_SANDBOX_PATH', __DIR__ );
 

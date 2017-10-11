@@ -360,39 +360,4 @@ class WP_Sandbox_Subnet{
 		*/
 		return false;
 	}
-
-	/**
-	 * Gets all network authenticated subnets. This is only called from a
-	 * multisite instance so we know it's multisite.
-	 *
-	 * @since      1.0.0
-	 * @access     public
-	 */
-	public static function get_network_authenticated_subnets(){
-		global $wpdb;
-		global $switched;
-
-		/*
-			Switch to the top level blog
-		*/
-		switch_to_blog(1);
-
-		/*
-			Gets the authenticated subnets for the sites
-		*/
-		$authenticatedSubnets = $wpdb->get_results(
-			"SELECT *
-			 FROM ".$wpdb->prefix."wps_subnets",
-		ARRAY_A );
-
-		/*
-			Restores the current blog
-		*/
-		restore_current_blog();
-
-		/*
-			Returns the authenticated subnets
-		*/
-		return $authenticatedSubnets;
-	}
 }

@@ -233,39 +233,4 @@ class WP_Sandbox_IP_Range{
 		*/
 		return false;
 	}
-
-	/**
-	 * Gets all network authenticated ips. This is only called from a
-	 * multisite instance so we know it's multisite.
-	 *
-	 * @since      1.0.0
-	 * @access     public
-	 */
-	public static function get_network_authenticated_ip_ranges(){
-		global $wpdb;
-		global $switched;
-
-		/*
-			Switch to the top level blog.
-		*/
-		switch_to_blog(1);
-
-		/*
-			Get all of the IP Ranges
-		*/
-		$authenticatedIPRanges = $wpdb->get_results(
-			"SELECT *
-			 FROM ".$wpdb->prefix."wps_ip_ranges",
-		ARRAY_A );
-
-		/*
-			Restore the current blog
-		*/
-		restore_current_blog();
-
-		/*
-			Return all of the authenticated IP Ranges
-		*/
-		return $authenticatedIPRanges;
-	}
 }

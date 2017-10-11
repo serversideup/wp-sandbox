@@ -98,7 +98,6 @@ class WP_Sandbox {
 	 * - WP_Sandbox_IP. Handles the management of ip access rules.
 	 * - WP_Sandbox_IP_Range. Handles the management if ip range access rules.
 	 * - WP_Sandbox_Preview_URL. Handles the management of the preview URL.
-	 * - WP_Sandbox_Network_Admin_Pages. Displays the admin pages for the network admin.
 	 * - WP_Sandbox_Admin_Pages. Displays the admin pages.
 	 *
 	 * Create an instance of the loader which will be used to register the hooks
@@ -182,11 +181,6 @@ class WP_Sandbox {
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/access/class-wp-sandbox-preview-url.php';
 
 		/**
-		 * The class responsible for the network admin pages
-		 */
-		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-sandbox-network-admin-pages.php';
-
-		/**
 		 * The class responsible for the admin pages
 		 */
 		require_once plugin_dir_path( dirname( __FILE__ ) ) . 'includes/class-wp-sandbox-admin-pages.php';
@@ -220,19 +214,9 @@ class WP_Sandbox {
 	 */
 	private function define_multisite_hooks(){
 		/*
-			Initializes the network admin pages.
-		*/
-		$networkAdminPages = new WP_Sandbox_Network_Admin_Pages();
-
-		/*
 			Initializes the default settings.
 		*/
 		$defaultSettings = new WP_Sandbox_Default_Settings();
-
-		/*
-			Adds the network admin pages.
-		*/
-		$this->loader->add_action( 'network_admin_menu', $networkAdminPages, 'add_network_admin_menu_pages' );
 
 		/*
 			When a new blog is created, we set the default settings for the blog.

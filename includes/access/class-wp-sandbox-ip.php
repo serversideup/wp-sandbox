@@ -187,7 +187,7 @@ class WP_Sandbox_IP{
 				Get the current blog ID
 			*/
 			$currentBlogID = get_current_blog_id();
-			
+
 			/*
 				Switch to the top level blog.
 			*/
@@ -199,9 +199,9 @@ class WP_Sandbox_IP{
 				the site.
 			*/
 			$ips = $wpdb->get_results( $wpdb->prepare(
-				"SELECT ip 
-				 FROM ".$wpdb->prefix."wps_ips 
-				 WHERE ip = '%s' 
+				"SELECT ip
+				 FROM ".$wpdb->prefix."wps_ips
+				 WHERE ip = '%s'
 				 AND blog_id = '%d'",
 				 $ipAddress,
 				 $currentBlogID
@@ -213,13 +213,13 @@ class WP_Sandbox_IP{
 				Checks to see if the IP is a valid IP for the blog
 			*/
 			$ips = $wpdb->get_results( $wpdb->prepare(
-				"SELECT ip 
+				"SELECT ip
 				 FROM ".$wpdb->prefix."wps_ips
 				 WHERE ip = '%s'",
 				 $ipAddress
 			), ARRAY_A );
 		}
-		
+
 		/*
 			If there is nothing returned then
 			the IP is invalid and returns false
@@ -229,37 +229,5 @@ class WP_Sandbox_IP{
 		}else{
 			return false;
 		}
-	}
-
-	/**
-	 * Get all of the network authhenticated IPs
-	 *
-	 * @since    1.0.0
-	 * @access   public
-	 * @var 	 string 	$ip 		IP being deleted
-	 */
-	public static function get_network_authenticated_ips(){
-		global $wpdb;
-		global $switched;
-
-		switch_to_blog(1);
-
-		/*
-			Get all of the authenticated IPs on the multisite install
-		*/
-		$authenticatedIPs = $wpdb->get_results(
-			"SELECT *
-			 FROM ".$wpdb->prefix."wps_ips",
-		ARRAY_A );
-
-		/*
-			Restore the current blog.
-		*/
-		restore_current_blog();
-
-		/*
-			Returns the authenticated IPs
-		*/
-		return $authenticatedIPs;
 	}
 }

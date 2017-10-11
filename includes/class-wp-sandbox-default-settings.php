@@ -49,7 +49,7 @@
 		 * @since      1.0.0
 		 * @access     public
 		 */
-		public function set_default_settings_multisite(){
+		public function set_default_settings_network_activated_multisite(){
 			global $wpdb;
 			$previewURL = new WP_Sandbox_Preview_URL();
 
@@ -65,36 +65,19 @@
 			*/
 			$blogList = array();
 
-			if( function_exists('get_blog_list') ){
-				/*
-					Get all of the blogs
-				*/
-				$blogReturn = get_blog_list( 0, 'all' );
-				$blogCounter = 0;
+			/*
+				Get all of the sites
+			*/
+			$blogReturn = get_sites();
+			$blogCounter = 0;
 
-				/*
-					Get an entire list of blogs and add the blog ID
-					to a blog list array.
-				*/
-				foreach( $blogReturn as $blog ){
-					$blogList[ $blogCounter ] = $blog['blog_id'];
-					$blogCounter++;
-				}
-			}else{
-				/*
-					Get all of the sites
-				*/
-				$blogReturn = wp_get_sites();
-				$blogCounter = 0;
-
-				/*
-					Get the entire list of blogs and add the blog ID
-					to a blog list array.
-				*/
-				foreach ( $blogReturn AS $blog ) {
-					$blogList[ $blogCounter ] = $blog['blog_id'];
-					$blogCounter++;
-				}
+			/*
+				Get the entire list of blogs and add the blog ID
+				to a blog list array.
+			*/
+			foreach ( $blogReturn as $blog ) {
+				$blogList[ $blogCounter ] = $blog->blog_id;
+				$blogCounter++;
 			}
 
 			global $switched;
@@ -109,83 +92,65 @@
 			*/
 			foreach( $blogList as $blogID ){
 				/*
-					Adds placeholder for default page setting
+					Checks to see if any existing settings exist for the blog. This would
+					only happen if a site has the plugin activated and the network admin
+					activates the plugin on the network.
 				*/
-				$checkDefaultWPSPage = $wpdb->get_results( $wpdb->prepare(
-					"SELECT setting_value
-					 FROM ".$wpdb->prefix."wps_settings
-					 WHERE setting_name = 'Default Page'
-					 AND blog_id = '%d'",
+				$existingSettings = $wpdb->get_results( $wpdb->prepare(
+					"SELECT * FROM ".$wpdb->prefix."wps_settings
+					 WHERE blog_id = '%d'",
 					 $blogID
 				), ARRAY_A );
 
 				/*
-					If the default page is not set on the blog, add
-					add a default setting.
+					If empty, we add the default settings for the plugin.
 				*/
-				if( empty( $checkDefaultWPSPage ) ){
-					$wpdb->query( $wpdb->prepare(
-						"INSERT INTO ".$wpdb->prefix."wps_settings
-						(blog_id, setting_name, setting_value)
-						VALUES ('%d', 'Default Page', '404')",
-						$blogID
-					) );
-				}
-
-				/*
-					Generates a preview hash and sets the setting
-					for each blog.
-				*/
-				$checkDefaultWPSHash = $wpdb->get_results( $wpdb->prepare(
-					"SELECT setting_value
-					 FROM ".$wpdb->prefix."wps_settings
-					 WHERE setting_name = 'Preview Hash'
-					 AND blog_id = '%d'",
-					 $blogID
-				), ARRAY_A );
-
-				/*
-					Checks to see if a default preview hash is not set
-					generate one and add a default preview hash to for the
-					site.
-				*/
-				if( empty( $checkDefaultWPSHash ) ){
+				if( empty( $existingSettings ) ){
 					$hash = WP_Sandbox_Preview_URL::generate_preview_hash();
 
 					$wpdb->query( $wpdb->prepare(
 						"INSERT INTO ".$wpdb->prefix."wps_settings
-						(blog_id, setting_name, setting_value)
-						VALUES ('%d', 'Preview Hash', '%s')",
+						(blog_id, preview_hash, enabled, background_color_1, background_color_2)
+						VALUES ('%d', '%s', '%d', '%s', '%s')",
 						$blogID,
-						$hash
+						$hash,
+						1,
+						'#5CCCF0',
+						'#3884E8'
 					), ARRAY_A );
 				}
-
-				/*
-					Adds a default setting for the status of the plugin and defaults
-					it to 0 which means disabled.
-				*/
-				$checkEnabled = $wpdb->get_results( $wpdb->prepare(
-					"SELECT setting_value
-					 FROM ".$wpdb->prefix."wps_settings
-					 WHERE setting_name = 'Enabled'
-					 AND blog_id = '%d'",
-					 $blogID
-				), ARRAY_A );
-
-				/*
-					Checks to see if the default blog enabled is set, if not
-					then add the default enabled setting for the blog.
-				*/
-				if( empty( $checkEnabled ) ){
-					$wpdb->query( $wpdb->prepare(
-						"INSERT INTO ".$wpdb->prefix."wps_settings
-						 (blog_id, setting_name, setting_value)
-						 VALUES ('%d', 'Enabled', '0')",
-						 $blogID
-					) );
-				}
 			}
+
+			restore_current_blog();
+		}
+
+		/**
+		 * Sets the default settings for a site in a multi site instance.
+		 *
+		 * @since      1.0.0
+		 * @access     public
+		 */
+		public function set_default_settings_multisite(){
+			global $wpdb;
+			$previewURL = new WP_Sandbox_Preview_URL();
+
+			$currentBlogID = get_current_blog_id();
+
+			global $switched;
+			switch_to_blog(1);
+
+			$hash = WP_Sandbox_Preview_URL::generate_preview_hash();
+
+			$wpdb->query( $wpdb->prepare(
+				"INSERT INTO ".$wpdb->prefix."wps_settings
+				(blog_id, preview_hash, enabled, background_color_1, background_color_2)
+				VALUES ('%d', '%s', '%d', '%s', '%s')",
+				$currentBlogID,
+				$hash,
+				1,
+				'#5CCCF0',
+				'#3884E8'
+			), ARRAY_A );
 
 			restore_current_blog();
 		}
@@ -214,38 +179,18 @@
 
 			$blogID = $newestBlog[0]['blog_id'];
 
-			/*
-				Adds default page setting
-			*/
-			$wpdb->query( $wpdb->prepare(
-				"INSERT INTO ".$wpdb->prefix."wps_settings
-				 (blog_id, setting_name)
-				 VALUES ('%d', 'Default Page')",
-				 $blogID
-			) );
-
-			/*
-				Generates and adds preview hash setting
-			*/
 			$hash = WP_Sandbox_Preview_URL::generate_preview_hash();
 
 			$wpdb->query( $wpdb->prepare(
 				"INSERT INTO ".$wpdb->prefix."wps_settings
-				 (blog_id, setting_name, setting_value)
-				 VALUES ('%d', 'Preview Hash', '%s')",
-				 $blogID,
-				 $hash
-			) );
-
-			/*
-				Adds site enabled setting
-			*/
-			$wpdb->query( $wpdb->prepare(
-				"INSERT INTO ".$wpdb->prefix."wps_settings
-				(blog_id, setting_name, setting_value)
-				VALUES ('%d', 'Enabled', '0')",
-				$blogID
-			) );
+				(blog_id, preview_hash, enabled, background_color_1, background_color_2)
+				VALUES ('%d', '%s', '%d', '%s', '%s')",
+				$blogID,
+				$hash,
+				1,
+				'#5CCCF0',
+				'#3884E8'
+			), ARRAY_A );
 
 			restore_current_blog();
 		}

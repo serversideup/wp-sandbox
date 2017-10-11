@@ -250,40 +250,6 @@ class WP_Sandbox_Authenticated_Users{
 	}
 
 	/**
-	 * Gets network authenticated users.
-	 *
-	 * @since    1.0.0
-	 * @access   public
-	 */
-	public static function get_network_authenticated_users(){
-		/*
-			Switch to the top level blog
-		*/
-		global $wpdb;
-		global $switched;
-
-		switch_to_blog(1);
-
-		/*
-			Get all users on the blog
-		*/
-		$authenticatedUsers = $wpdb->get_results(
-			"SELECT *
-			 FROM ".$wpdb->prefix."wps_authenticated_users",
-		ARRAY_A );
-
-		/*
-			Restore the current blog
-		*/
-		restore_current_blog();
-
-		/*
-			Return all of the authenticated users.
-		*/
-		return $authenticatedUsers;
-	}
-
-	/**
 	 * Saves a valid login for the authenticated user allowing them to
 	 * view the site not logged in.
 	 *

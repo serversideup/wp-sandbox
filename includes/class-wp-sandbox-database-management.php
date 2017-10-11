@@ -76,6 +76,65 @@ class WP_Sandbox_Database_Management {
 		}
 	}
 
+	public function delete_deactivated_data(){
+		global $wpdb;
+
+		/*
+			Gets the current blog ID.
+		*/
+		$currentBlogID = get_current_blog_id();
+
+		global $switched;
+		switch_to_blog(1);
+
+		/*
+			Deletes the IP Range by ID
+		*/
+		$wpdb->query( $wpdb->prepare(
+			"DELETE FROM ".$wpdb->prefix."wps_ip_ranges
+			WHERE blog_id = '%d'",
+			$currentBlogID
+		) );
+
+		/*
+			Delets the Subnet by ID
+		*/
+		$wpdb->query( $wpdb->prepare(
+			"DELETE FROM ".$wpdb->prefix."wps_subnets
+			WHERE blog_id = '%d'",
+			$currentBlogID
+		) );
+
+		/*
+			Deletes the IP rule for the blog
+		*/
+		$wpdb->query( $wpdb->prepare(
+			"DELETE FROM ".$wpdb->prefix."wps_ips
+			AND blog_id = '%d'",
+			$currentBlogID
+		) );
+
+		/*
+			Deletes the authenticated user from the blog.
+		*/
+		$wpdb->query( $wpdb->prepare(
+			"DELETE FROM ".$wpdb->prefix."wps_authenticated_users
+			 WHERE id = '%d'",
+			 $currentBlogID
+		) );
+
+		/*
+			Deletes the settings
+		*/
+		$wpdb->query( $wpdb->prepare(
+			"DELETE FROM ".$wpdb->prefix."wps_settings
+			 WHERE blog_id = '%d'",
+			 $currentBlogID
+		) );
+
+		restore_current_blog();
+	}
+
 	/**
 	 * Build the tables for Authenticated Users
 	 *

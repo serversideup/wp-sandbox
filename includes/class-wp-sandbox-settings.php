@@ -87,7 +87,7 @@ class WP_Sandbox_Settings{
 			$wpdb->query( $wpdb->prepare(
 				"UPDATE ".$wpdb->prefix."wps_settings
 				SET enabled = '%d'
-				AND blog_id = '%d'",
+				WHERE blog_id = '%d'",
 				$enabled,
 				$currentBlogID
 			) );
@@ -217,7 +217,7 @@ class WP_Sandbox_Settings{
 			$pluginStatus = $wpdb->get_results( $wpdb->prepare(
 				"SELECT enabled
 				 FROM ".$wpdb->prefix."wps_settings
-				 AND blog_id = '%d'",
+				 WHERE blog_id = '%d'",
 				 $currentBlogID
 			), ARRAY_A );
 
@@ -388,7 +388,37 @@ class WP_Sandbox_Settings{
 			global $switched;
 			switch_to_blog(1);
 
-
+			$wpdb->query( $wpdb->prepare(
+				"UPDATE ".$wpdb->prefix."wps_settings
+				 SET `logo` = %s,
+				 `main_title` = %s,
+				 `sub_title` = %s,
+				 `show_login_link` = %s,
+				 `background_color_1` = %s,
+				 `background_color_2` = %s,
+				 `twitter_url` = %s,
+				 `facebook_url` = %s,
+				 `google_plus_url` = %s,
+				 `instagram_url` = %s,
+				 `vimeo_url` = %s,
+				 `dribbble_url` = %s,
+				 `youtube_url` = %s
+				 WHERE blog_id = %d",
+				 $_POST['logo'],
+				 $_POST['main_title'],
+				 $_POST['sub_title'],
+				 $_POST['show_login_link'] == 'on' ? 1 : 0,
+				 $_POST['background_color_1'],
+				 $_POST['background_color_2'],
+				 $_POST['twitter'],
+				 $_POST['facebook'],
+				 $_POST['google_plus'],
+				 $_POST['instagram'],
+				 $_POST['vimeo'],
+				 $_POST['dribbble'],
+				 $_POST['youtube'],
+				 $currentBlogID
+			) );
 
 			/*
 				Restores the current blog

@@ -11,48 +11,50 @@
 		Configure the Admin Settings screen.
 	*/
 	$(document).ready(function(){
-		/*
-			Binds the event handlers for the page.
-		*/
-		wpSandboxBindEventHandlers();
+		if( settings != undefined ){
+			/*
+				Binds the event handlers for the page.
+			*/
+			wpSandboxBindEventHandlers();
 
-		primaryBackground = settings.background_color_1;
-		secondaryBackground = settings.background_color_2;
+			primaryBackground = settings.background_color_1;
+			secondaryBackground = settings.background_color_2;
 
-		/*
-			Sets the background color for the icon to select the background color.
-		*/
-		$('#background-color-1').css('background-color', settings.background_color_1 );
-		$('#background-color-2').css('background-color', settings.background_color_2 );
+			/*
+				Sets the background color for the icon to select the background color.
+			*/
+			$('#background-color-1').css('background-color', settings.background_color_1 );
+			$('#background-color-2').css('background-color', settings.background_color_2 );
 
-		/*
-			Set the background colors for coming soon.
-		*/
-		wpSandboxSetComingSoonBackground();
+			/*
+				Set the background colors for coming soon.
+			*/
+			wpSandboxSetComingSoonBackground();
 
-		/*
-			Defaults the color picker to the background color 1
-		*/
-		$('#background-color-1').ColorPicker({
-			color: settings.background_color_1,
-			onChange: function (hsb, hex, rgb) {
-				primaryBackground = '#'+hex;
-				$('#background-color-1').css('backgroundColor', '#' + hex);
-				wpSandboxSetComingSoonBackground();
-			}
-		});
+			/*
+				Defaults the color picker to the background color 1
+			*/
+			$('#background-color-1').ColorPicker({
+				color: settings.background_color_1,
+				onChange: function (hsb, hex, rgb) {
+					primaryBackground = '#'+hex;
+					$('#background-color-1').css('backgroundColor', '#' + hex);
+					wpSandboxSetComingSoonBackground();
+				}
+			});
 
-		/*
-			Defaults the color picker to the background color 2
-		*/
-		$('#background-color-2').ColorPicker({
-			color: settings.background_color_2,
-			onChange: function (hsb, hex, rgb) {
-				secondaryBackground = '#'+hex;
-				$('#background-color-2').css('backgroundColor', '#' + hex);
-				wpSandboxSetComingSoonBackground();
-			}
-		});
+			/*
+				Defaults the color picker to the background color 2
+			*/
+			$('#background-color-2').ColorPicker({
+				color: settings.background_color_2,
+				onChange: function (hsb, hex, rgb) {
+					secondaryBackground = '#'+hex;
+					$('#background-color-2').css('backgroundColor', '#' + hex);
+					wpSandboxSetComingSoonBackground();
+				}
+			});
+		}
 	});
 
 	/*

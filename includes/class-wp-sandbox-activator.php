@@ -30,7 +30,7 @@ class WP_Sandbox_Activator {
 	 *
 	 * @since    1.0.0
 	 */
-	public static function activate() {
+	public static function activate( ) {
 		/*
 			Build the tables for the database management.
 		*/
@@ -43,11 +43,21 @@ class WP_Sandbox_Activator {
 		$defaultSettings = new WP_Sandbox_Default_Settings();
 
 		/*
-			If the site is multisite set the default settings for 
+			If the site is multisite set the default settings for
 			multisite.
 		*/
 		if( is_multisite() ){
-			$defaultSettings->set_default_settings_multisite();
+			$referringURL = wp_get_referer();
+
+			/*
+				If network activating the plugin, we have to set defaults for all
+				Wordpress sites
+			*/
+			if( strpos( $referringURL, '/wp-admin/network/plugins.php' ) !== false ){
+				$defaultSettings->set_default_settings_network_activated_multisite();
+			}else{
+				$defaultSettings->set_default_settings_multisite();
+			}
 		}else{
 			$defaultSettings->set_default_settings();
 		}
